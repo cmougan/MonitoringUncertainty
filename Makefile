@@ -15,3 +15,10 @@ stupid:
 
 test:
 	pytest testCN/testCN.py
+
+
+make export_requirements:
+	conda list --export > requirements.txt
+
+make install_requirements:
+	conda install --file requirements.txt

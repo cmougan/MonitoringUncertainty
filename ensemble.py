@@ -33,7 +33,7 @@ class StdForestClassifier:
 
     def predict(self, X, std=False):
 
-        tree_predictions = [tree.predict(X) for tree in self.rf.estimators_]
+        tree_predictions = [tree.predict_proba(X) for tree in self.rf.estimators_]
         if std:
             preds = np.std(np.array(tree_predictions), axis=0)
         else:
