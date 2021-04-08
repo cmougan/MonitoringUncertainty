@@ -127,3 +127,12 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+*.idea/*
+
+*.DS_Store
+
+
+stupid.py
+stupid.ipynb
+*.csv
