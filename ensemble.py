@@ -31,12 +31,12 @@ class StdForestClassifier:
 
         return self
 
-    def predict(self, X, std=False):
+    def predict_proba(self, X):
+        return np.mean([tree.predict_proba(X) for tree in self.rf.estimators_])
 
-        tree_predictions = [tree.predict_proba(X) for tree in self.rf.estimators_]
-        if std:
-            preds = np.std(np.array(tree_predictions), axis=0)
-        else:
-            preds = np.mean(np.array(tree_predictions), axis=0)
+    def predict(self, X):
 
-        return preds
+        return np.median([tree.predict(X) for tree in self.rf.estimators_])
+
+    def predict_std(self, X):
+        return np.std([tree.predict_proba(X) for tree in self.rf.estimators_])
