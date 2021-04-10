@@ -36,9 +36,12 @@ class StdForestClassifier:
         return np.mean(np.array(tree_predictions), axis=0)
 
     def predict(self, X):
+        proba = self.predict_proba(X)
+        return np.argmax(proba, axis=1)
+
         tree_predictions = [tree.predict(X) for tree in self.rf.estimators_]
         return np.median(np.array(tree_predictions), axis=0)
 
     def predict_std(self, X):
         tree_predictions = [tree.predict_proba(X) for tree in self.rf.estimators_]
-        return np.std(np.array(tree_predictions), axis=0)
+        return np.std(np.array(tree_predictions), axis=0)[:,0]
