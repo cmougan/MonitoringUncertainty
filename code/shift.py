@@ -7,7 +7,7 @@ class DistributionShift(BaseEstimator,TransformerMixin):
     Transformer implements several distribution shift transformations.
     '''
 
-    def __init__(self, data, cols=[],strategy=):
+    def __init__(self, data, cols=[],strategy='covariateShift'):
         '''
 
         :param data:
@@ -16,6 +16,8 @@ class DistributionShift(BaseEstimator,TransformerMixin):
 
         # Currently only works with DataFrame TODO works with np.array
         assert isinstance(data, pd.DataFrame)
+
+        assert strategy in ['covariateShift']
 
         # If no columns are indicated uses all
         self.data = data
