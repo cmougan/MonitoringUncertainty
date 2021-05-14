@@ -44,4 +44,4 @@ class StdForestClassifier:
 
     def predict_std(self, X):
         tree_predictions = [tree.predict_proba(X) for tree in self.rf.estimators_]
-        return np.std(np.array(tree_predictions), axis=0)[:,0]
+        return np.std(np.array(tree_predictions), axis=0)[:, 0]
