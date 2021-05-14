@@ -53,3 +53,13 @@ class TestDistributionShift(unittest.TestCase):
         np.testing.assert_equal(
             db.transform(self.X, parameter=10).mean(axis=0), np.array([12, 13, 14])
         )
+
+        # Param = 0
+        db = DistributionShift(param=0.0)
+        db.fit(self.X, self.y)
+        np.testing.assert_equal(db.transform(self.X).mean(axis=0), np.array([2, 3, 4]))
+
+    def test_does_nothing(self):
+        db = DistributionShift()
+        db.fit(self.X, self.y)
+        np.testing.assert_equal(db.transform(self.X).mean(axis=0), np.array([2, 3, 4]))
