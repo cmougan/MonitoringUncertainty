@@ -1,4 +1,3 @@
-.PHONY: install test
 black:
 	python -m black .
 	python -m black stupid.py
@@ -35,11 +34,5 @@ install_some_packages:
 	conda install pip
 	pip install jedi==0.17.2
 
-
-
-default: test
-
-
-
 test:
-    PYTHONPATH=. pytest
+	python -m pytest tests
