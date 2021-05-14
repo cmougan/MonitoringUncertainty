@@ -1,13 +1,7 @@
-import pandas as pd
 import numpy as np
-import setuptools
 from scipy import sparse
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.utils.validation import check_is_fitted, FLOAT_DTYPES
-from sklearn.utils.extmath import (
-    _incremental_mean_and_var,
-    _incremental_weighted_mean_and_var,
-)
 
 
 class DistributionShift(BaseEstimator, TransformerMixin):
@@ -15,7 +9,7 @@ class DistributionShift(BaseEstimator, TransformerMixin):
     Transformer implements several distribution shift transformations.
     """
 
-    def __init__(self, param: float = 1, cols=[], strategy="covariateShift"):
+    def __init__(self, param: float = 0, cols=[], strategy="covariateShift"):
         """
 
         :param data:
@@ -53,7 +47,7 @@ class DistributionShift(BaseEstimator, TransformerMixin):
             del self.min_
             del self.max_
 
-    def fit(self, X, y=None, sample_weight=None):
+    def fit(self, X, y=None):
         """Compute the mean and std to be used for later scaling.
         Parameters
         ----------
@@ -74,9 +68,9 @@ class DistributionShift(BaseEstimator, TransformerMixin):
 
         # Reset internal state before fitting
         self._reset()
-        return self.partial_fit(X, y, sample_weight)
+        return self.partial_fit(X, y)
 
-    def partial_fit(self, X, y=None, sample_weight=None):
+    def partial_fit(self, X, y=None):
         """
         Online computation of mean and std on X for later scaling.
 
@@ -112,7 +106,9 @@ class DistributionShift(BaseEstimator, TransformerMixin):
 
         self.Xt = X.copy()
 
-        if parameter != None:
+        if parameter == 0:
+            return X
+        elif parameter != None:
             self.param = parameter
 
         if self.strategy == "covariateShift":
