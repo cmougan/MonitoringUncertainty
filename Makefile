@@ -4,7 +4,9 @@ black:
 
 gitall:
 	git add .
-	git commit -m $$m
+	echo 'Enter the commit message:'
+	read commitMessage
+	git commit -m "$commitMessage"
 	git push
 
 
