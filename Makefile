@@ -18,11 +18,9 @@ test:
 	pytest testCN/testCN.py
 
 
-export_requirements:
-	conda list --export > requirements.txt
-
 install_requirements:
-	conda install --file requirements.txt
+	pip install -r requirements.txt
+
 
 notebook_memory_usage:
 	conda install -c conda-forge jupyter-resource-usage

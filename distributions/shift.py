@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 from scipy import sparse
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.utils.validation import check_is_fitted, FLOAT_DTYPES
@@ -22,16 +23,17 @@ class DistributionShift(BaseEstimator, TransformerMixin):
             )
         self.strategy = strategy
 
+        self.cols = cols
+
         if not isinstance(param, (float, int)):
             raise ValueError("param should be a float or int")
         self.param = param
 
-        # If no columns are indicated uses all
+        # List of dic with stats values to aggregate
+        self.mapping_ = []
 
-        if len(cols) > 1:
-            self.cols = cols
-        else:
-            self.cols = []
+        # Assume there is no need to convert to dataframe
+        self.convert_dataframe = False
 
     def _reset(self):
         """Reset internal data-dependent state of the scaler, if necessary.
@@ -41,11 +43,7 @@ class DistributionShift(BaseEstimator, TransformerMixin):
         # Checking one attribute is enough, becase they are all set together
         # in partial_fit
         if hasattr(self, "scale_"):
-            del self.scale_
-            del self.mean_
-            del self.std_
-            del self.min_
-            del self.max_
+            del self.mapping_
 
     def fit(self, X, y=None):
         """Compute the mean and std to be used for later scaling.
@@ -68,43 +66,38 @@ class DistributionShift(BaseEstimator, TransformerMixin):
 
         # Reset internal state before fitting
         self._reset()
-        return self.partial_fit(X, y)
 
-    def partial_fit(self, X, y=None):
-        """
-        Online computation of mean and std on X for later scaling.
-
-        ----------
-        X : {array-like, sparse matrix} of shape (n_samples, n_features)
-            The data used to compute the mean and standard deviation
-            used for later scaling along the features axis.
-        y : None
-            Ignored.
-        sample_weight : array-like of shape (n_samples,), default=None
-            Individual weights for each sample.
-            .. versionadded:: 0.24
-               parameter *sample_weight* support to StandardScaler.
-        Returns
-        -------
-        self : object
-            Fitted scaler.
-        """
         if sparse.issparse(X):
             raise TypeError("DistributionShift does not support sparse input. ")
 
-        n_features = X.shape[1]
+        # Convert to DataFrame in case is np.ndarray
+        if isinstance(X, np.ndarray):
+            X = pd.DataFrame(X)
+            self.convert_dataframe = True
 
-        self.mean_ = np.mean(X, axis=0)
-        self.std_ = np.std(X, axis=0)
-        self.min_ = np.min(X, axis=0)
-        self.max_ = np.max(X, axis=0)
+        # If no columns are indicated uses all
+        if len(self.cols) < 1:
+            self.cols = X.columns
+
+        mapping = []
+        for col in self.cols:
+            mapping.append(
+                {
+                    "col": col,
+                    "min": np.min(X[col]),
+                    "max": np.max(X[col]),
+                    "std": np.std(X[col]),
+                }
+            )
+        self.mapping_ = mapping
 
         return self
 
     def transform(self, X, parameter=None):
         check_is_fitted(self)
 
-        self.Xt = X.copy()
+        if self.convert_dataframe:
+            X = pd.DataFrame(X)
 
         if parameter == 0:
             return X
@@ -112,7 +105,18 @@ class DistributionShift(BaseEstimator, TransformerMixin):
             self.param = parameter
 
         if self.strategy == "covariateShift":
-            self.Xt += self.param * self.std_
-            return self.Xt
+            return self.transform_covariateShif(X)
         else:
             raise ValueError("Distribution Shift Strategy not supported")
+
+    def transform_covariateShif(self, X):
+        Xt = X.copy()
+
+        for item in self.mapping_:
+            Xt[item["col"]] = X[item["col"]] + self.param * item["std"]
+
+        # Convert back to numpy array
+        if self.convert_dataframe:
+            Xt = Xt.to_numpy()
+
+        return Xt
