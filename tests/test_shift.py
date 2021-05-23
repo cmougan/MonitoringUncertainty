@@ -1,13 +1,9 @@
 import unittest
 import pytest
 
-from code import DistributionShift
 import numpy as np
-import pandas as pd
 
-from sklearn.datasets import make_classification
-import random
-
+from distributions import DistributionShift
 
 class TestDistributionShift(unittest.TestCase):
     def setUp(self):
