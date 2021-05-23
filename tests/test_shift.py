@@ -112,4 +112,4 @@ class TestDistributionShift(unittest.TestCase):
         db = DistributionShift(cols=['a'],param=1)
 
         db.fit(self.X, self.y)
-        np.testing.assert_equal(db.transform(self.X).mean(axis=0), np.array([2, 4, 5]))
+        np.testing.assert_equal(db.transform(self.X).mean(axis=0), np.array([3, 3, 4]))
