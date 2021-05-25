@@ -4,9 +4,7 @@ black:
 
 gitall:
 	git add .
-	echo 'Enter the commit message:'
-	read commitMessage
-	git commit -m "$commitMessage"
+	@read -p "Enter commit message: " message; 	git commit -m "$$message"
 	git push
 
 
@@ -20,11 +18,9 @@ test:
 	pytest testCN/testCN.py
 
 
-export_requirements:
-	conda list --export > requirements.txt
-
 install_requirements:
-	conda install --file requirements.txt
+	pip install -r requirements.txt
+
 
 notebook_memory_usage:
 	conda install -c conda-forge jupyter-resource-usage
