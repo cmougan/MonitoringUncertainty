@@ -24,7 +24,6 @@ class TestDistributionShift(unittest.TestCase):
             DistributionShift(param="aa")
 
     def test_covariateShift_1(self):
-
         # Param = 1
         db = DistributionShift(param=1.0)
         db.fit(self.X, self.y)
@@ -111,7 +110,7 @@ class TestDistributionShift(unittest.TestCase):
         np.testing.assert_equal(db.transform(self.X).mean(axis=0), np.array([2, 3, 4]))
 
     def test_col_selection(self):
-        db = DistributionShift(cols=['a'],param=1)
+        db = DistributionShift(cols=["a"], param=1)
 
         db.fit(self.X, self.y)
         np.testing.assert_equal(db.transform(self.X).mean(axis=0), np.array([3, 3, 4]))
@@ -123,5 +122,5 @@ class TestDistributionShift(unittest.TestCase):
         np.testing.assert_equal(db.transform(self.X).mean(axis=0), np.array([2, 3, 4]))
 
         # Modify parameters
-        db.set_params(cols=['a'], param=1)
+        db.set_params(cols=["a"], param=1)
         np.testing.assert_equal(db.transform(self.X).mean(axis=0), np.array([3, 3, 4]))

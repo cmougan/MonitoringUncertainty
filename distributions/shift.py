@@ -23,6 +23,7 @@ class DistributionShift(BaseEstimator, TransformerMixin):
             )
         self.strategy = strategy
 
+        # Columns to transform
         self.cols = cols
 
         if not isinstance(param, (float, int)):
@@ -44,6 +45,8 @@ class DistributionShift(BaseEstimator, TransformerMixin):
         # in partial_fit
         if hasattr(self, "scale_"):
             del self.mapping_
+            del self.cols
+            del self.columns_transform
 
     def fit(self, X, y=None):
         """Compute the mean and std to be used for later scaling.
@@ -93,7 +96,7 @@ class DistributionShift(BaseEstimator, TransformerMixin):
 
         return self
 
-    def transform(self, X, parameter=None):
+    def transform(self, X, parameter=None, columns_transform=[]):
         check_is_fitted(self)
 
         if self.convert_dataframe:
@@ -104,6 +107,12 @@ class DistributionShift(BaseEstimator, TransformerMixin):
         elif parameter != None:
             self.param = parameter
 
+        if columns_transform != []:
+            self.cols = columns_transform
+
+        # Sanity check on the columns
+        #self._check_columns_transform(self.cols, columns_transform)
+
         if self.strategy == "covariateShift":
             return self.transform_covariateShif(X)
         else:
@@ -112,11 +121,28 @@ class DistributionShift(BaseEstimator, TransformerMixin):
     def transform_covariateShif(self, X):
         Xt = X.copy()
 
+        # For every mapped column (mapped columns are selected in the fit)
         for item in self.mapping_:
-            Xt[item["col"]] = X[item["col"]] + self.param * item["std"]
+            # Only transform those specified on the transform
+            if item["col"] in self.cols:
+                Xt[item["col"]] = X[item["col"]] + self.param * item["std"]
 
         # Convert back to numpy array
         if self.convert_dataframe:
             Xt = Xt.to_numpy()
 
         return Xt
+
+    def _check_subset(self, L1, L2):
+        S1 = set(L1)
+        S2 = set(L2)
+
+        # Check for repeated values
+        if len(S1) != len(L1):
+            raise ValueError("Column in the fit are repeated")
+        if len(S2) != len(L2):
+            raise ValueError("Column in the transform are repeated")
+
+        if S1.intersection(S2) != S1:
+            raise ValueError("Column for transform were excluded in the fit.")
+        return ""
