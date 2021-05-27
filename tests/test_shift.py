@@ -23,18 +23,19 @@ class TestDistributionShift(unittest.TestCase):
         with pytest.raises(ValueError):
             DistributionShift(param="aa")
 
-    def test_covariateShift(self):
-
+    def test_covariateShift_1(self):
         # Param = 1
         db = DistributionShift(param=1.0)
         db.fit(self.X, self.y)
         np.testing.assert_equal(db.transform(self.X).mean(axis=0), np.array([3, 4, 5]))
 
+    def test_covariateShift_2(self):
         # Param = 2
         db = DistributionShift(param=2.0)
         db.fit(self.X, self.y)
         np.testing.assert_equal(db.transform(self.X).mean(axis=0), np.array([4, 5, 6]))
 
+    def test_covariateShift_10(self):
         # Param = 10
         db = DistributionShift(param=10.0)
         db.fit(self.X, self.y)
@@ -42,6 +43,7 @@ class TestDistributionShift(unittest.TestCase):
             db.transform(self.X).mean(axis=0), np.array([12, 13, 14])
         )
 
+    def test_covariateShift_onTransform(self):
         # On transform
         db = DistributionShift(param=1.0)
         db.fit(self.X, self.y)
@@ -54,7 +56,6 @@ class TestDistributionShift(unittest.TestCase):
         np.testing.assert_equal(
             db.transform(self.X, parameter=10).mean(axis=0), np.array([12, 13, 14])
         )
-
         # Param = 0
         db = DistributionShift(param=0.0)
         db.fit(self.X, self.y)
@@ -109,7 +110,17 @@ class TestDistributionShift(unittest.TestCase):
         np.testing.assert_equal(db.transform(self.X).mean(axis=0), np.array([2, 3, 4]))
 
     def test_col_selection(self):
-        db = DistributionShift(cols=['a'],param=1)
+        db = DistributionShift(cols=["a"], param=1)
 
         db.fit(self.X, self.y)
+        np.testing.assert_equal(db.transform(self.X).mean(axis=0), np.array([3, 3, 4]))
+
+    def test_col_selection_post(self):
+        db = DistributionShift(param=0)
+        db.fit(self.X, self.y)
+        # Check nothing happens
+        np.testing.assert_equal(db.transform(self.X).mean(axis=0), np.array([2, 3, 4]))
+
+        # Modify parameters
+        db.set_params(cols=["a"], param=1)
         np.testing.assert_equal(db.transform(self.X).mean(axis=0), np.array([3, 3, 4]))

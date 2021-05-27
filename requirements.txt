@@ -16,4 +16,4 @@ doubt==3.0.0
 pandas==1.2.4
 jedi==0.17.2
 tqdm==4.60.0
- matplotlib==3.4.2
+matplotlib==3.4.2
