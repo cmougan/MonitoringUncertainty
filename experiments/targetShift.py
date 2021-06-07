@@ -29,7 +29,7 @@ for dataset in datasets:
         X = X.sort_values("target").reset_index(drop=True)
 
         # Determine fraction to use in test (will be x2 the split point)
-        split_point = int(X.shape[0] * 0.25)
+        split_point = int(X.shape[0] * 0.35)
 
         # Select smaller and bigger than splitting point
         train = X.iloc[split_point : X.shape[0] - split_point]
