@@ -17,3 +17,4 @@ pandas==1.2.4
 jedi==0.17.2
 tqdm==4.60.0
 matplotlib==3.4.2
+seaborn==0.11.1
