@@ -34,7 +34,7 @@ for dataset in datasets:
         # Select smaller and bigger than splitting point
         train = X.iloc[split_point : X.shape[0] - split_point]
         pre = X.iloc[:split_point]
-        post = X.iloc[split_point:]
+        post = X.iloc[X.shape[0] - split_point:]
         test = pre.append(post)
 
         # Train Test Split
@@ -60,7 +60,8 @@ for dataset in datasets:
         file_name = str(model)+ '_'+str(dataset)+'_'+'full.png'
         fig_path = os.path.join(path_out, file_name)
         plt.savefig(fig_path)
-        plt.show()
+        plt.close()
+
 
 
         pred_test = clf.predict(X_te, uncertainty=0.05)
@@ -78,4 +79,4 @@ for dataset in datasets:
         file_name = str(model)+ '_'+str(dataset)+'_'+'kde.png'
         fig_path = os.path.join(path_out, file_name)
         plt.savefig(fig_path)
-        plt.show()
+        plt.close()
