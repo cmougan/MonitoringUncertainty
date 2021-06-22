@@ -8,6 +8,25 @@ from sklearn.utils.validation import check_is_fitted, FLOAT_DTYPES
 class DistributionShift(BaseEstimator, TransformerMixin):
     """
     Transformer implements several distribution shift transformations.
+    Example
+    -------
+    import numpy as np
+    import pandas as pd
+
+    from distributions import DistributionShift
+
+
+    X = pd.DataFrame(
+            np.array([[1.0, 2.0, 3.0], [3.0, 4.0, 5.0]]), columns=["a", "b", "c"]
+        )
+
+    y = np.array([0, 1.0, 2.0])
+
+
+    # Param = 1
+    db = DistributionShift(param=1.0)
+    db.fit(X, y)
+    X_shifted = db.transform(X)
     """
 
     def __init__(self, param: float = 0, cols=[], strategy="covariateShift"):
