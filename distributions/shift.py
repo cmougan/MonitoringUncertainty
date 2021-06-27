@@ -111,7 +111,7 @@ class DistributionShift(BaseEstimator, TransformerMixin):
             self.cols = columns_transform
 
         # Sanity check on the columns
-        #self._check_columns_transform(self.cols, columns_transform)
+        # self._check_columns_transform(self.cols, columns_transform)
 
         if self.strategy == "covariateShift":
             return self.transform_covariateShif(X)
