@@ -138,3 +138,5 @@ stupid.ipynb
 *.csv
 .dataset_cache
 Untitled.ipynb
+
+**/.vim
