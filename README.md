@@ -24,30 +24,30 @@ Joaquin Quiñonero - Data Drifts (NIPS2006) \
 Evaluating Predictive Uncertainty Under Dataset Shift (NIPS2019)
 
 Our work differs:
- - Tackling Dataset Shift with Uncertainty -- Not done to the best of our knowledge
+ - Tackling Dataset Shift with bootstrapping Uncertainty -- Not done to the best of our knowledge
  - Detecting when the model performance is downgraded. Classic statistics only detect covariate shifts.
 
 ## Experimental Methodology
 Implementation and experiments can be found in a publicly available repository
 
 ### Datasets
-Describe dataset, regression, continual variable
+Describe dataset, regression.
+
+**Shifts**
+**DatasetUCI**
+
 
 ### Uncertainty Estimation
-Bootstrap \
-Quantile regression \
-Qagging Forest? \
+bootstrap Prediction Intervals in Non-Parametric Regression
 
+### Experiment Synthetic Distribution Shift
 
-Brief comment why Tree methods don't work
-### Pipeline
-Distribution Shift \
-Feature Selection \
-Rebasing
+### Experiment Real Distribution Shift
 
 ### Detecting the source of the uncertainty
 
 Using feature relevance techniques as SHAP to detect the source of the uncertainty.
+
 ## Results and Discussion
 Results of uncertainty vs classical statistics
 
