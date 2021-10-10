@@ -14,9 +14,9 @@ Our experiments have been organized into two main groups: Firstly, we assess the
 
 
 
-##Detecting gradual distribution shift
+## Detecting gradual distribution shift
 The notebook for this experiment is 
 GradualDistShift.ipynb
 
-##Detecting the source of uncertainty
+## Detecting the source of uncertainty
 The notebook for this experiment is xAIUncertainty.ipynb
