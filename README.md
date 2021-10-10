@@ -1,54 +1,22 @@
 [![black](https://img.shields.io/badge/code%20style-black-000000.svg?style=plastic)](https://github.com/psf/black)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?color=g&style=plastic)](https://opensource.org/licenses/MIT)
 
-# Monitoring Uncertainty - Outline
+# Monitoring Model Deterioration under DistributionShift with Explainable Uncertainty Estimation
 
-## Intro
-The performance of machine learning models in production degrades over time.
-In order to maintain high performance, models are retrained using previous and new input data. 
-This is process is called continual learning, and it can be computationally expensive and have high demands in the software engineering system.
+## Abstract
+Detecting distribution shift in machine learning models once they are deployed is challenging. It is even more challenging deciding when to retrain models in real-case scenarios when labeled data is beyond reach, and monitoring performance metrics is unfeasible. 
+In this work, we use non-parametric bootstrapped uncertainty estimates and SHAP values to provide explainable uncertainty estimation as a technique that aims to monitor machine learning models in deployment environments and address the source of model degradation. 
+We release the open-source code used to reproduce our experiments.
 
-The performance of a model is typically judged based on the evaluation of the predictions in the deployment scenario. 
-In many cases having the true label of the deployed data is not feasible. Thus is not possible to calculate evaluation metrics in order to assess the performance of the model and decide whether to retrain.
+## Experiments
 
-*Data is not static, it evolves*.
-This fact is called distribution shift and it's the main source of model performance deterioration. 
-
-Traditional ways of monitoring distribution shift when the real target distribution is not available are using the
-Population Stability Index (PSI) or the Kolmogorov-Smirnov (KS) test. This statistical test correctly detects univariate changes
-on the distribution but fails to detect when the model performance drops.
-
-## Previous Work
-Neil Lawrence - Continual Learning (NIPS2018) \
-Joaquin Quiñonero - Data Drifts (NIPS2006) \
-Evaluating Predictive Uncertainty Under Dataset Shift (NIPS2019)
-
-Our work differs:
- - Tackling Dataset Shift with bootstrapping Uncertainty -- Not done to the best of our knowledge
- - Detecting when the model performance is downgraded. Classic statistics only detect covariate shifts.
-
-## Experimental Methodology
-Implementation and experiments can be found in a publicly available repository
-
-### Datasets
-Describe dataset, regression.
-
-**Shifts**
-**DatasetUCI**
+Our experiments have been organized into two main groups: Firstly, we assess the performance of our proposed uncertainty method for monitoring distribution drift. Secondly, we evaluate the usability of the explainable uncertainty for identifying the features that are driving model degradation in a local and global scenarios. All experiments were run on the CPU of a single MacBook Pro, and in all experiments we used the default hyperparameters in scikit-learn.
 
 
-### Uncertainty Estimation
-bootstrap Prediction Intervals in Non-Parametric Regression
 
-### Experiment Synthetic Distribution Shift
+##Detecting gradual distribution shift
+The notebook for this experiment is 
+GradualDistShift.ipynb
 
-### Experiment Real Distribution Shift
-
-### Detecting the source of the uncertainty
-
-Using feature relevance techniques as SHAP to detect the source of the uncertainty.
-
-## Results and Discussion
-Results of uncertainty vs classical statistics
-
-Uncertainty estimates covariate shift, furthermore, it denotes when the performance of an ML model has deteriorated.
+##Detecting the source of uncertainty
+The notebook for this experiment is xAIUncertainty.ipynb
