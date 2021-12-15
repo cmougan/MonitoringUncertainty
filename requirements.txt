@@ -30,15 +30,12 @@ graphviz==0.16
 idna==2.10
 importlib-metadata==4.0.1
 interface-meta==1.2.3
-ipykernel @ file:///opt/concourse/worker/volumes/live/73e8766c-12c3-4f76-62a6-3dea9a7da5b7/volume/ipykernel_1596206701501/work/dist/ipykernel-5.3.4-py3-none-any.whl
-ipython @ file:///opt/concourse/worker/volumes/live/bb221eaa-cc1a-4ab2-40f7-74a2020a44b1/volume/ipython_1599056234390/work
 ipython-genutils==0.2.0
 ipywidgets==7.6.3
 jedi==0.17.2
 Jinja2==3.0.1
 joblib==1.0.1
 jsonschema==3.2.0
-jupyter-client @ file:///tmp/build/80754af9/jupyter_client_1601311786391/work
 jupyter-core==4.6.3
 jupyterlab-pygments==0.1.2
 jupyterlab-widgets==1.0.0
@@ -71,10 +68,8 @@ pickleshare==0.7.5
 Pillow==8.2.0
 plotly==5.0.0
 prometheus-client==0.11.0
-prompt-toolkit @ file:///tmp/build/80754af9/prompt-toolkit_1602688806899/work
 ptyprocess==0.6.0
 pycparser==2.20
-Pygments @ file:///tmp/build/80754af9/pygments_1600458456400/work
 pyparsing==2.4.7
 pyrsistent==0.17.3
 python-dateutil==2.8.1
@@ -101,11 +96,9 @@ threadpoolctl==2.1.0
 toml==0.10.2
 tornado==6.1
 tqdm==4.60.0
-traitlets @ file:///tmp/build/80754af9/traitlets_1602787416690/work
 typed-ast==1.4.3
 typing-extensions==3.10.0.0
 urllib3==1.26.4
-wcwidth @ file:///tmp/build/80754af9/wcwidth_1593447189090/work
 webencodings==0.5.1
 widgetsnbextension==3.5.1
 wrapt==1.12.1
