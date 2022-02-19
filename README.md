@@ -23,7 +23,6 @@ Our contributions are the following:
 
 
 ## Experiments
-
 Our experiments have been
 organized into three main groups: Firstly, we compare our non-parametric bootstrapped estimation method with the previous state of the art, NASA and MAPIE. Secondly, we assess the performance of our proposed uncertainty method for monitoring the performance of a machine learning model. And then, we evaluate the usability of the explainable uncertainty for identifying the features that are driving model degradation in local and global scenarios. 
 
