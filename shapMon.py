@@ -1,12 +1,10 @@
 # %%
 # Import candidate models
 from doubt import Boot
-from sklearn.linear_model import (
-    LinearRegression,
-)
-
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import mean_absolute_error
+from xgboost import XGBRegressor
+import pdb
 
 # Import datasets
 from doubt.datasets import (
@@ -25,8 +23,6 @@ plt.style.use("ggplot")
 
 import warnings
 from collections import defaultdict
-
-get_ipython().run_line_magic("matplotlib", "inline")
 from matplotlib import rcParams
 
 plt.style.use("seaborn-whitegrid")
@@ -44,7 +40,7 @@ import shap
 # %%
 dataset_classes = [
     Airfoil,
-    Concrete,
+    # Concrete,
     # FishToxicity,
     # ForestFire,
     # NewTaipeiHousing,
@@ -133,7 +129,8 @@ def monitoring_plot(
 
         uncertainty_res = []
         ks_res = []
-        shap_res = []
+        shap_col = []
+        shap_mean = []
         for idx, col in tqdm(enumerate(X.columns), total=len(X.columns)):
             values = defaultdict(list)
 
@@ -141,15 +138,18 @@ def monitoring_plot(
             data = data.sort_values(col).reset_index(drop=True).copy()
 
             # Train Test Split
-            data_sub = data.iloc[:oneThird]
             data_train = data.iloc[oneThird:twoThird]
-            data_up = data.iloc[twoThird:]
 
             X_tot = data.drop(columns="target")
             X_tr = data_train.drop(columns="target")
 
             y_tot = data[["target"]].target.values
             y_tr = data_train[["target"]].target.values
+
+            # Uncertainty
+            preds, intervals = regressor.predict(
+                X_tot, uncertainty=0.05, n_boots=n_boots
+            )
 
             # Shap
             # Fit the regressor
@@ -158,21 +158,23 @@ def monitoring_plot(
 
             # Predictions
             preds = regressor.predict(X_tot)
+
             # use Decision Tree specific SHAP to explain
             explainer = shap.Explainer(regressor)
             shap_values = explainer(X_tot)
             shap_values = pd.DataFrame(data=shap_values.values, columns=X_tot.columns)
 
+            shap_values_train = explainer(X_tr)
+            shap_values_train = pd.DataFrame(
+                data=shap_values_train.values, columns=X_tot.columns
+            )
 
             # shap_res.append(np.mean(df.shap_diff.values))
             # Fit the regressor
             regressor = Boot(base_regressor(**kwargs))
             regressor.fit(X_tr, y_tr, n_boots=20)
 
-            # Predictions
-            preds, intervals = regressor.predict(
-                X_tot, uncertainty=0.05, n_boots=n_boots
-            )
+
 
             # Statistics
             df = pd.DataFrame(
@@ -181,6 +183,11 @@ def monitoring_plot(
             df["error"] = np.abs(preds - y_tot)
             ## TODO: NOT SURE ABOUT THIS ABSOLUTE VALUE THINGY
             df["mean_shap"] = np.mean(np.abs(shap_values), axis=1)
+            plt.figure()
+            plt.plot(df['error'],label('error'))
+            plt.plot(df['error'],label('error'))
+            plt.plot(df['error'],label('error'))
+            df["col_shap"] = shap_values[col].values
 
             ### KS Test
             df["ks"] = data[col]
@@ -189,10 +196,28 @@ def monitoring_plot(
             df[["ks"]] = (
                 df[["ks"]].rolling(ROLLING_STAT, int(ROLLING_STAT * 0.5)).apply(kol_smi)
             )  # Takes ages
-            
+
+            ### Shap col Test
+            df["shap_col"] = shap_values_train[col]
+            BASE_COMP = shap_values_train[col]
+            df[["shap_col"]] = (
+                df[["shap_col"]]
+                .rolling(ROLLING_STAT, int(ROLLING_STAT * 0.5))
+                .apply(kol_smi)
+            )  # Takes ages
+
+            ### Shap mean
+            df["shap_mean"] = shap_values.mean(axis=1)
+            BASE_COMP = shap_values_train.mean(axis=1)
+            df[["shap_mean"]] = (
+                df[["shap_mean"]]
+                .rolling(ROLLING_STAT, int(ROLLING_STAT * 0.5))
+                .apply(kol_smi)
+            )  # Takes ages
+
             ### Rolling window on all
-            df[df.columns[~df.columns.isin(["ks"])]] = (
-                df[df.columns[~df.columns.isin(["ks"])]]
+            df[df.columns[~df.columns.isin(["ks", "shap_col", "shap_mean"])]] = (
+                df[df.columns[~df.columns.isin(["ks", "shap_col", "shap_mean"])]]
                 .rolling(ROLLING_STAT, int(ROLLING_STAT * 0.5))
                 .mean()
             ).dropna()
@@ -210,7 +235,8 @@ def monitoring_plot(
                 mean_absolute_error(values["error"], values["uncertainty"])
             )
             ks_res.append(mean_absolute_error(values["error"], values["ks"]))
-            shap_res.append(mean_absolute_error(values["error"], values["mean_shap"]))
+            shap_col.append(mean_absolute_error(values["error"], values["shap_col"]))
+            shap_mean.append(mean_absolute_error(values["error"], values["shap_mean"]))
 
             # Plotting
             if plot:
@@ -220,7 +246,12 @@ def monitoring_plot(
                     else:
                         axs[idx // 3, idx % 3].plot(vals)
         resultados = pd.DataFrame(
-            {"uncertainy": uncertainty_res, "ks": ks_res, "shap": shap_res}
+            {
+                "uncertainy": uncertainty_res,
+                "ks": ks_res,
+                "shap_col": shap_col,
+                "shap_mean": shap_mean,
+            }
         )
         print("Data", dataset.__name__)
         print(resultados.mean())
@@ -229,13 +260,11 @@ def monitoring_plot(
         if plot:
             fig.legend()
             plt.savefig("fig.png")
-            plt.show()
         return resultados
+
+
 # %%
 
 for dataset in dataset_classes:
     monitoring_plot(dataset, XGBRegressor)
-
-# %%
-1
 # %%
