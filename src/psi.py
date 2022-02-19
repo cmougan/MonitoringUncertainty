@@ -1,7 +1,8 @@
 import numpy as np
 
-def psi(expected, actual, buckettype='bins', buckets=10, axis=0):
-    '''Calculate the PSI (population stability index) across all variables
+
+def psi(expected, actual, buckettype="bins", buckets=10, axis=0):
+    """Calculate the PSI (population stability index) across all variables
 
     Args:
        expected: numpy matrix of original values
@@ -17,10 +18,10 @@ def psi(expected, actual, buckettype='bins', buckets=10, axis=0):
        Matthew Burke
        github.com/mwburke
        worksofchart.com
-    '''
+    """
 
     def _psi(expected_array, actual_array, buckets):
-        '''Calculate the PSI for a single variable
+        """Calculate the PSI for a single variable
 
         Args:
            expected_array: numpy array of original values
@@ -29,7 +30,7 @@ def psi(expected, actual, buckettype='bins', buckets=10, axis=0):
 
         Returns:
            psi_value: calculated PSI value
-        '''
+        """
 
         def scale_range(input, min, max):
             input += -(np.min(input))
@@ -39,18 +40,24 @@ def psi(expected, actual, buckettype='bins', buckets=10, axis=0):
 
         breakpoints = np.arange(0, buckets + 1) / (buckets) * 100
 
-        if buckettype == 'bins':
-            breakpoints = scale_range(breakpoints, np.min(expected_array), np.max(expected_array))
-        elif buckettype == 'quantiles':
-            breakpoints = np.stack([np.percentile(expected_array, b) for b in breakpoints])
+        if buckettype == "bins":
+            breakpoints = scale_range(
+                breakpoints, np.min(expected_array), np.max(expected_array)
+            )
+        elif buckettype == "quantiles":
+            breakpoints = np.stack(
+                [np.percentile(expected_array, b) for b in breakpoints]
+            )
 
-        expected_percents = np.histogram(expected_array, breakpoints)[0] / len(expected_array)
+        expected_percents = np.histogram(expected_array, breakpoints)[0] / len(
+            expected_array
+        )
         actual_percents = np.histogram(actual_array, breakpoints)[0] / len(actual_array)
 
         def sub_psi(e_perc, a_perc):
-            '''Calculate the actual PSI value from comparing the values.
-               Update the actual value to a very small number if equal to zero
-            '''
+            """Calculate the actual PSI value from comparing the values.
+            Update the actual value to a very small number if equal to zero
+            """
             if a_perc == 0:
                 a_perc = 0.0001
             if e_perc == 0:
@@ -59,7 +66,10 @@ def psi(expected, actual, buckettype='bins', buckets=10, axis=0):
             value = (e_perc - a_perc) * np.log(e_perc / a_perc)
             return value
 
-        psi_value = np.sum(sub_psi(expected_percents[i], actual_percents[i]) for i in range(0, len(expected_percents)))
+        psi_value = np.sum(
+            sub_psi(expected_percents[i], actual_percents[i])
+            for i in range(0, len(expected_percents))
+        )
 
         return psi_value
 
@@ -72,8 +82,8 @@ def psi(expected, actual, buckettype='bins', buckets=10, axis=0):
         if len(psi_values) == 1:
             psi_values = _psi(expected, actual, buckets)
         elif axis == 0:
-            psi_values[i] = _psi(expected[:,i], actual[:,i], buckets)
+            psi_values[i] = _psi(expected[:, i], actual[:, i], buckets)
         elif axis == 1:
-            psi_values[i] = _psi(expected[i,:], actual[i,:], buckets)
+            psi_values[i] = _psi(expected[i, :], actual[i, :], buckets)
 
     return psi_values
