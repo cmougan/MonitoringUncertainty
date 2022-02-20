@@ -1,6 +1,5 @@
 # %%
 # Import candidate models
-from doubt import Boot
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import cross_val_predict, KFold
 from sklearn.metrics import mean_absolute_error
@@ -37,12 +36,12 @@ import shap
 
 # %%
 dataset_classes = [
-    # Airfoil,
+    Airfoil,
     # Concrete,
     # FishToxicity,
     # ForestFire,
     # NewTaipeiHousing,
-    PowerPlant,
+    # PowerPlant,
     # Protein,
     # Servo,
 ]
@@ -78,10 +77,6 @@ def kol_smi(x):
 
 def psi_stat(x):
     return psi(x, BASE_COMP)
-
-
-# In[15]:
-
 
 def monitoring_plot(
     dataset,
@@ -127,10 +122,8 @@ def monitoring_plot(
 
         uncertainty_res = []
         ks_res = []
-        shap_col = []
-        shap_mean = []
-        col_shap = []
-        mean_shap = []
+        shap_error = []
+        shap_preds = []
         for idx, col in tqdm(enumerate(X.columns), total=len(X.columns)):
             if idx >= 1:
                 break
@@ -147,14 +140,6 @@ def monitoring_plot(
 
             y_tot = data[["target"]].target.values
             y_tr = data_train[["target"]].target.values
-
-            # Uncertainty
-            regressor = Boot(base_regressor(**kwargs))
-            regressor.fit(X_tr, y_tr, n_boots=20)
-
-            preds, intervals = regressor.predict(
-                X_tot, uncertainty=0.05, n_boots=n_boots
-            )
 
             # Shap
             # Fit the regressor
@@ -190,36 +175,19 @@ def monitoring_plot(
                 data=shap_values_train.values, columns=X_tot.columns
             )
 
+            # Fit model on explanations
+            expli = XGBRegressor()
+            expli.fit(shap_values_train,y_tr)
+            exp_full = expli.predict(shap_values)
+
             # shap_res.append(np.mean(df.shap_diff.values))
 
             # Statistics
             df = pd.DataFrame(
-                intervals[:, 1] - intervals[:, 0], columns=["uncertainty"]
+                exp_full, columns=["explanations"]
             )
             df["error"] = np.abs(preds - y_tot)
-            ## TODO: NOT SURE ABOUT THIS ABSOLUTE VALUE THINGY
-            df["mean_shap"] = np.mean(np.abs(shap_values), axis=1)
-            df["col_shap"] = np.abs(shap_values[col].values)
-            aux = df.copy()
-
-            ### Shap col Test
-            df["shap_col"] = shap_values[col]
-            global BASE_COMP
-            BASE_COMP = shap_values_train[col]
-            df[["shap_col"]] = (
-                df[["shap_col"]]
-                .rolling(ROLLING_STAT, int(ROLLING_STAT * 0.5))
-                .apply(kol_smi)
-            )  # Takes ages
-
-            ### Shap mean
-            df["shap_mean"] = shap_values.mean(axis=1)
-            BASE_COMP = shap_values_train.mean(axis=1)
-            df[["shap_mean"]] = (
-                df[["shap_mean"]]
-                .rolling(ROLLING_STAT, int(ROLLING_STAT * 0.5))
-                .apply(kol_smi)
-            )  # Takes ages
+            df['preds'] = preds
 
             ### KS Test
             df["ks"] = data[col]
@@ -240,14 +208,11 @@ def monitoring_plot(
             for index, col in enumerate(df.columns):
                 values[col] = df[col]
 
-            uncertainty_res.append(
-                mean_absolute_error(values["error"], values["uncertainty"])
-            )
+
             ks_res.append(mean_absolute_error(values["error"], values["ks"]))
-            shap_col.append(mean_absolute_error(values["error"], values["shap_col"]))
-            shap_mean.append(mean_absolute_error(values["error"], values["shap_mean"]))
-            col_shap.append(mean_absolute_error(values["error"], values["col_shap"]))
-            mean_shap.append(mean_absolute_error(values["error"], values["mean_shap"]))
+            shap_preds.append(mean_absolute_error(values["preds"], values["explanations"]))
+            shap_error.append(mean_absolute_error(values["error"], values["explanations"]))
+
             #############
             # Plotting #
             #############
