@@ -78,6 +78,7 @@ def kol_smi(x):
 def psi_stat(x):
     return psi(x, BASE_COMP)
 
+
 def monitoring_plot(
     dataset,
     base_regressor: type,
@@ -177,20 +178,19 @@ def monitoring_plot(
 
             # Fit model on explanations
             expli = XGBRegressor()
-            expli.fit(shap_values_train,y_tr)
+            expli.fit(shap_values_train, y_tr)
             exp_full = expli.predict(shap_values)
 
             # shap_res.append(np.mean(df.shap_diff.values))
 
             # Statistics
-            df = pd.DataFrame(
-                exp_full, columns=["explanations"]
-            )
+            df = pd.DataFrame(exp_full, columns=["explanations"])
             df["error"] = np.abs(preds - y_tot)
-            df['preds'] = preds
+            df["preds"] = preds
 
             ### KS Test
             df["ks"] = data[col]
+            global BASE_COMP
             BASE_COMP = data[col]
             df[["ks"]] = (
                 df[["ks"]].rolling(ROLLING_STAT, int(ROLLING_STAT * 0.5)).apply(kol_smi)
@@ -208,10 +208,13 @@ def monitoring_plot(
             for index, col in enumerate(df.columns):
                 values[col] = df[col]
 
-
             ks_res.append(mean_absolute_error(values["error"], values["ks"]))
-            shap_preds.append(mean_absolute_error(values["preds"], values["explanations"]))
-            shap_error.append(mean_absolute_error(values["error"], values["explanations"]))
+            shap_preds.append(
+                mean_absolute_error(values["preds"], values["explanations"])
+            )
+            shap_error.append(
+                mean_absolute_error(values["error"], values["explanations"])
+            )
 
             #############
             # Plotting #
@@ -234,12 +237,9 @@ def monitoring_plot(
                         axs[idx // 3, idx % 3].plot(vals)
         resultados = pd.DataFrame(
             {
-                "uncertainy": uncertainty_res,
                 "ks": ks_res,
-                "shap_col": shap_col,
-                "shap_mean": shap_mean,
-                "col_shap": col_shap,
-                "mean_shap": mean_shap,
+                "shap_preds": shap_preds,
+                "shap_error": shap_error,
             }
         )
         print("Data", dataset.__name__)
