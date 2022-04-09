@@ -33,29 +33,28 @@ random.seed(0)
 ## Create variables
 ### Normal
 samples = 10_000
-# x1 = np.random.normal(1, 0.2, size=samples)
-# x2 = np.random.normal(1, 0.2, size=samples)
-# x3 = np.random.normal(1, 0.2, size=samples)
+x1 = np.random.normal(1, 5, size=samples)
+x2 = np.random.normal(1, 5, size=samples)
+x3 = np.random.normal(1, 5, size=samples)
 mean = (1, 1, 1)
 cov = [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
-x = np.random.multivariate_normal(mean, cov, size=samples)
-df = pd.DataFrame(x)
+# x = np.random.multivariate_normal(mean, cov, size=samples)
+# df = pd.DataFrame(x)
 
-mean = (0, 0, 0)
-cov = [[1, 0.1, 0.1], [0.1, 1, 0.1], [0.1, 0.1, 1]]
-x = np.random.multivariate_normal(mean, cov, size=samples)
-X_ood = pd.DataFrame(x)
 
-# df = pd.DataFrame(data=[x1, x2, x3]).T
+df = pd.DataFrame(data=[x1, x2, x3]).T
 df.columns = ["Var%d" % (i + 1) for i in range(df.shape[1])]
-df["target"] = df["Var1"] * df["Var2"] + np.random.normal(0, 0.1, samples)
+df["target"] = df["Var1"] + 0.1 * df["Var2"] + np.random.normal(0, 0.1, samples)
 # %%
 ## Fit our ML model
 X_tr, X_te, y_tr, y_te = train_test_split(df.drop(columns="target"), df[["target"]])
 
+X_ood = X_te.copy()
+for col in X_ood.columns:
+    X_ood[col] = X_ood[col] + 100
 # %%
 l = Lasso(alpha=0.001).fit(X_tr, y_tr)
-model = Boot(MLPRegressor())
+model = Boot(LinearRegression())
 model.fit(X_tr, y_tr.target.values, n_boots=20)
 
 # Predictions
@@ -63,11 +62,13 @@ preds, intervals = model.predict(X_ood, uncertainty=0.05, n_boots=20)
 uncertainty = intervals[:, 1] - intervals[:, 0]
 # %%
 
-g = Lasso(alpha=0.001)
+g = LinearRegression()
 g.fit(X_ood, uncertainty)
 
 ## Explanation
-explainer = shap.LinearExplainer(g, X_ood, feature_dependence="correlation_dependent")
+explainer = shap.LinearExplainer(
+    g, X_ood, feature_dependence="interventional"
+)  # "correlation_dependent"
 shap_values = explainer(X_ood)
 exp = pd.DataFrame(
     data=shap_values.values, columns=["Shap%d" % (i + 1) for i in range(3)]
