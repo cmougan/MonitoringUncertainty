@@ -87,7 +87,7 @@ np.abs(exp).mean()
 # %%
 s = g.coef_ * (np.array([10, 10, 10]) - np.mean(full).values)
 # %%
-plt.title("Analytical local Shapley values for linear regression ")
+plt.title("Local Shapley values for linear regression for synthetic data ")
 plt.ylabel("Shaple Value")
 plt.bar(["$\phi_1$", "$\phi_2$", "$\phi_3$"], s)
 plt.savefig("experiments/results/analytical.png")
