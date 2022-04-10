@@ -67,3 +67,24 @@ compare our method with. Neither, on the application of uncertainty estimation t
 All reviewers asked about performance and/or ablation studies. We will add a
 computational performance comparison to the appendix, along with other simple
 ablation studies that can help to clarify the contributions.
+
+## Appendix
+### Synthetic data
+
+For this case, we create a three-variate normal distributions $X = (X_1,X_2,X_3) \sim N(1,0.1\cdot I_3)$, where $I_3$ is an identity matrix of order three. The target variable is generated  $Y=X_1\cdot X_1 +  X_2 +   \epsilon$, with $\epsilon \sim N(0,0.1)$, to have a non linear feature, a linear feature and a non used feature. For both, training and test data, $10,000$ samples are drawn. Then out-of-distribution data is created by shifting $X$ by $\forall j \in \{1,2,3\}: X^{ood}_j = X^{tr}_j + 10$. 
+
+We train a linear regression model $f_\theta$ on $\{X^{tr},Y^{tr}\}$, and calculate the uncertainty using Doubt (cf. Section XX). We then train another linear model $g_\theta$  on $\{X^{te},X^{ood}\}$ and the uncertainty estimates. The coeficcients of the linear model are $\beta_1= 0.0206,  \beta_2=0.0089 ,\beta_3= 0.004$
+
+
+ Since the features are independent and the used model is a linear regression we can calculate the interventional conditional expectation Shapley
+values as $\phi_i(g_\theta, x) = \beta_i(x_i-\mu_i)$ [3]. 
+
+So for the data point $x=\{10,10,10\}$. The Shapley values are $\phi_i(g_\theta, x)) = \{0.016,0.005,0.002\}$  The most relevant shifted feature in the model is the one that receives the highest Shapley value.
+
+![](experiments/results/analytical.png)
+
+
+
+ [3]Chen, H., Janizek, J. D., Lundberg, S., & Lee, S. I. (2020). True to the Model or True to the Data?. arXiv preprint arXiv:2006.16234.
+
+
