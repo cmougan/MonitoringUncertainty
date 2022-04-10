@@ -30,7 +30,6 @@ effect on the price of the house. The age of a garage will naturally shift,
 thus triggering monitoring systems based on distribution shift, but as no
 performance drop happens, this is not an instance of model deterioration.
 
-
 ## Reviewer #4: Hyperparameters
 The fourth reviewer states that we did not mention the hyperparameters used.
 While this is correct, we did mention that we used the default hyperparameters
@@ -69,6 +68,7 @@ computational performance comparison to the appendix, along with other simple
 ablation studies that can help to clarify the contributions.
 
 ## Appendix
+We add a synthetic experiment to help to clarify the contribution.
 ### Synthetic data
 
 For this case, we create a three-variate normal distributions $X = (X_1,X_2,X_3) \sim N(1,0.1\cdot I_3)$, where $I_3$ is an identity matrix of order three. The target variable is generated  $Y=X_1\cdot X_1 +  X_2 +   \epsilon$, with $\epsilon \sim N(0,0.1)$, to have a non linear feature, a linear feature and a non used feature. For both, training and test data, $10,000$ samples are drawn. Then out-of-distribution data is created by shifting $X$ by $\forall j \in \{1,2,3\}: X^{ood}_j = X^{tr}_j + 10$. 
