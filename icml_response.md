@@ -75,11 +75,12 @@ For this case, we create a three-variate normal distributions $X = (X_1,X_2,X_3)
 
 We train a linear regression model $f_\theta$ on $\{X^{tr},Y^{tr}\}$, and calculate the uncertainty using Doubt (cf. Section XX). We then train another linear model $g_\theta$  on $\{X^{te},X^{ood}\}$ and the uncertainty estimates. The coeficcients of the linear model are $\beta_1= 0.0615,  \beta_2=0.0015 ,\beta_3= 0.004$
 
-
- Since the features are independent and the used model is a linear regression we can calculate the interventional conditional expectation Shapley
+Since the features are independent and the used model is a linear regression we can calculate the interventional conditional expectation Shapley
 values as $\phi_i(g_\theta, x) = \beta_i(x_i-\mu_i)$ [3]. 
 
 So for the data point $x=\{10,10,10\}$. The Shapley values are $\phi_i(g_\theta, x)) = \{0.050,0.012,0.003\}$  The most relevant shifted feature in the model is the one that receives the highest Shapley value.
+
+In this experiment with synthetic data, statistical testing on the input data would have flagged the three feature distributions as equally shifted. With our proposed method we are able to identify the more meaningful features towards identifying the source of model predictive performance deterioration.
 
 ![](experiments/results/analytical.png)
 
