@@ -81,10 +81,9 @@ values as $\phi_i(g_\theta, x) = \beta_i(x_i-\mu_i)$ [3].
 
 So for the data point $x=\{10,10,10\}$. The Shapley values are $\phi_i(g_\theta, x)) = \{0.050,0.012,0.003\}$  The most relevant shifted feature in the model is the one that receives the highest Shapley value.
 
-In this experiment with synthetic data, statistical testing on the input data would have flagged the three feature distributions as equally shifted. With our proposed method we are able to identify the more meaningful features towards identifying the source of model predictive performance deterioration.
+In this experiment with synthetic data, statistical testing on the input data would have flagged the three feature distributions as equally shifted. With our proposed method, we can identify the more meaningful features towards identifying the source of model predictive performance deterioration.
 
 ![](experiments/results/analytical.png)
-
 
 
  [3]Chen, H., Janizek, J. D., Lundberg, S., & Lee, S. I. (2020). True to the Model or True to the Data?. arXiv preprint arXiv:2006.16234.
