@@ -89,7 +89,7 @@ s = g.coef_ * (np.array([10, 10, 10]) - np.mean(full).values)
 # %%
 plt.title("Local Shapley values for linear regression for synthetic data ")
 plt.ylabel("Shaple Value")
-plt.bar(["$\phi_1$", "$\phi_2$", "$\phi_3$"], s)
+plt.bar(["$\mathcal{S}_1$", "$\mathcal{S}_2$", "$\mathcal{S}_3$"], s)
 plt.savefig("experiments/results/analytical.png")
 plt.show()
 
