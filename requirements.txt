@@ -102,8 +102,8 @@ urllib3==1.26.4
 webencodings==0.5.1
 widgetsnbextension==3.5.1
 wrapt==1.12.1
-xgboost==1.4.2
 xlrd==2.0.1
 zipp==3.4.1
 xgboost==1.5.1
 tabulate==0.8.9
+mapie==0.3.2
