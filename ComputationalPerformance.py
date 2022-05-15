@@ -1,9 +1,4 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[1]:
-
-
+# %%
 import pandas as pd
 import numpy as np
 from tqdm.auto import tqdm
@@ -32,12 +27,8 @@ from doubt.datasets import (
 from mapie.regression import MapieRegressor
 import time
 
-
+# %%
 # ## Setting up
-
-# In[2]:
-
-
 def evaluate_nasa(model, X_tr, X_te, y_tr, y_te, uncertainty=0.05):
     n_boots = int(np.sqrt(len(X_tr)))
 
@@ -81,9 +72,7 @@ def evaluate_nasa(model, X_tr, X_te, y_tr, y_te, uncertainty=0.05):
     return coverage, mean_width
 
 
-# In[3]:
-
-
+# %%
 def evaluate_doubt(model, X_tr, X_te, y_tr, y_te, uncertainty=0.05):
     n_boots = int(np.sqrt(len(X_tr)))
 
@@ -96,9 +85,7 @@ def evaluate_doubt(model, X_tr, X_te, y_tr, y_te, uncertainty=0.05):
     return coverage, mean_width
 
 
-# In[4]:
-
-
+# %%
 def evaluate_mapie(model, X_tr, X_te, y_tr, y_te, uncertainty=0.05):
     bmodel = MapieRegressor(model)
     bmodel.fit(X_tr, y_tr)
@@ -109,9 +96,8 @@ def evaluate_mapie(model, X_tr, X_te, y_tr, y_te, uncertainty=0.05):
     return coverage, mean_width
 
 
-# In[5]:
-
-
+# %%
+## Scaling
 datasets = []
 scaler = StandardScaler()
 
@@ -138,29 +124,13 @@ for dataset_class in dataset_classes:
 len(datasets)
 
 
-# In[6]:
-
-
 for name, X_tr, X_te, y_tr, y_te in datasets:
     print(f"{name}: {len(X_tr) + len(X_te):,} samples, {X_tr.shape[-1]:,} features")
 
-
+# %%
 # ## Models
-
-# In[7]:
-
-
 models = [LinearRegression(), DecisionTreeRegressor(), XGBRegressor()]
-
-
-# In[8]:
-
-
 results = []
-
-
-# In[9]:
-
 
 for model in models:
     for dataset in tqdm(datasets):
@@ -189,19 +159,9 @@ for model in models:
                 ]
             )
 
-
-# In[13]:
-
-
+# %%
+# Save results
 dt = pd.DataFrame(
     results, columns=["Data", "Model", "Uncertainty", "Nasa", "Doubt", "Mapie"]
 )
-
-
-# In[15]:
-
-
 dt.to_csv("experiments/computationalPerformance.csv", index=False)
-
-
-# In[ ]:
