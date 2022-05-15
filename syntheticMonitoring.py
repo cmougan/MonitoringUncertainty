@@ -4,7 +4,6 @@
 from sklearn.utils.validation import check_is_fitted
 from doubt import Boot
 from sklearn.linear_model import (
-
     Lasso,
 )
 
@@ -206,10 +205,11 @@ def monitoring_plot(
         resultados.loc["mean"] = resultados.mean()
 
         if plot:
-            plt.legend(loc=2, prop={'size': 6})
+            plt.legend(loc=2, prop={"size": 6})
             axs[0].set_title("Quadratic feature")
             axs[1].set_title("Linear feature")
             axs[2].set_title("Random feature")
+            plt.savefig("experiments/results/syntheticDegradation.eps", format="eps")
             plt.savefig("experiments/results/syntheticDegradation.png")
             plt.show()
         return resultados
