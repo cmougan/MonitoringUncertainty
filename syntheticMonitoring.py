@@ -2,20 +2,14 @@
 # Import candidate models
 
 from sklearn.utils.validation import check_is_fitted
-from catboost import train
-from doubt import Boot, QuantileRegressor, QuantileRegressionForest
+from doubt import Boot
 from sklearn.linear_model import (
-    LinearRegression,
-    PoissonRegressor,
-    GammaRegressor,
-    HuberRegressor,
+
     Lasso,
 )
-from sklearn.ensemble import RandomForestRegressor
-from sklearn.svm import LinearSVR
-from sklearn.neural_network import MLPRegressor
+
 from sklearn.preprocessing import StandardScaler
-from sklearn.tree import DecisionTreeRegressor
+
 from sklearn.metrics import mean_absolute_error
 from sklearn.model_selection import train_test_split
 import random
@@ -25,8 +19,8 @@ random.seed(0)
 # Import external libraries
 import pandas as pd
 import numpy as np
-from tqdm.auto import tqdm, trange
-from scipy.stats import ks_2samp, entropy, kruskal
+from tqdm.auto import tqdm
+from scipy.stats import ks_2samp
 import matplotlib.pyplot as plt
 
 plt.style.use("ggplot")
@@ -41,7 +35,7 @@ rcParams["axes.labelsize"] = 14
 rcParams["xtick.labelsize"] = 12
 rcParams["ytick.labelsize"] = 12
 rcParams["figure.figsize"] = 16, 8
-rcParams.update({"font.size": 22})
+rcParams.update({"font.size": 16})
 
 # Import internal classes
 from distributions import DistributionShift
@@ -212,7 +206,7 @@ def monitoring_plot(
         resultados.loc["mean"] = resultados.mean()
 
         if plot:
-            plt.legend()
+            plt.legend(loc=2, prop={'size': 6})
             axs[0].set_title("Cuadratic feature")
             axs[1].set_title("Linear feature")
             axs[2].set_title("Random feature")
@@ -226,4 +220,5 @@ a = monitoring_plot(df, Lasso, alpha=0.00001)
 
 # %%
 a
+
 # %%
