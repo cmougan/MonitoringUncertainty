@@ -32,10 +32,10 @@ df["rows"] = df.Data.map(rows)
 # %%
 for model in df.Model.unique():
     ## Params
-    if model == 'LinearRegression':
-        legend=True
+    if model == "LinearRegression":
+        legend = True
     else:
-        legend=False
+        legend = False
 
     aux = df[df.Model == model]  # .groupby('Data').mean()
     aux = aux.sort_values("rows")
