@@ -207,7 +207,7 @@ def monitoring_plot(
 
         if plot:
             plt.legend(loc=2, prop={'size': 6})
-            axs[0].set_title("Cuadratic feature")
+            axs[0].set_title("Quadratic feature")
             axs[1].set_title("Linear feature")
             axs[2].set_title("Random feature")
             plt.savefig("experiments/results/syntheticDegradation.png")
