@@ -35,12 +35,13 @@ import warnings
 from collections import defaultdict
 
 from matplotlib import rcParams
-plt.style.use('seaborn-whitegrid')
-rcParams['axes.labelsize'] = 14
-rcParams['xtick.labelsize'] = 12
-rcParams['ytick.labelsize'] = 12
-rcParams['figure.figsize'] = 16,8
-rcParams.update({'font.size': 22})
+
+plt.style.use("seaborn-whitegrid")
+rcParams["axes.labelsize"] = 14
+rcParams["xtick.labelsize"] = 12
+rcParams["ytick.labelsize"] = 12
+rcParams["figure.figsize"] = 16, 8
+rcParams.update({"font.size": 22})
 
 # Import internal classes
 from distributions import DistributionShift
@@ -67,8 +68,11 @@ df["target"] = df["Var1"] ** 2 + df["Var2"] + np.random.normal(0, 0.01, samples)
 def kol_smi(x):
     return ks_2samp(x, BASE_COMP).statistic
 
+
 def kol_smi_preds(x):
     return ks_2samp(x, BASE_COMP_PREDS).statistic
+
+
 def psi_stat(x):
     return psi(x, BASE_COMP)
 
@@ -154,14 +158,16 @@ def monitoring_plot(
             # Label Shift
             global BASE_COMP_PREDS
             BASE_COMP_PREDS = preds_tr
-            df['target_shift'] = preds
+            df["target_shift"] = preds
             df[["target_shift"]] = (
-                df[["target_shift"]].rolling(ROLLING_STAT, int(ROLLING_STAT * 0.5)).apply(kol_smi_preds)
-            ) 
+                df[["target_shift"]]
+                .rolling(ROLLING_STAT, int(ROLLING_STAT * 0.5))
+                .apply(kol_smi_preds)
+            )
 
             ### Rolling window on all
-            df[df.columns[~df.columns.isin(["ks", "PSI","target_shift"])]] = (
-                df[df.columns[~df.columns.isin(["ks", "PSI","target_shift"])]]
+            df[df.columns[~df.columns.isin(["ks", "PSI", "target_shift"])]] = (
+                df[df.columns[~df.columns.isin(["ks", "PSI", "target_shift"])]]
                 .rolling(ROLLING_STAT, int(ROLLING_STAT * 0.5))
                 .mean()
             ).dropna()
@@ -184,7 +190,9 @@ def monitoring_plot(
             )
             ks_res.append(mean_absolute_error(values["error"], values["ks"]))
             psi_res.append(mean_absolute_error(values["error"], values["PSI"]))
-            target_shift.append(mean_absolute_error(values["error"], values["target_shift"]))
+            target_shift.append(
+                mean_absolute_error(values["error"], values["target_shift"])
+            )
 
             # Plotting
 
@@ -192,7 +200,12 @@ def monitoring_plot(
                 axs[idx].plot(vals, label=f"{name} values")
 
         resultados = pd.DataFrame(
-            {"uncertainy": uncertainty_res, "ks": ks_res, "psi": psi_res, "target_shift": target_shift}
+            {
+                "uncertainy": uncertainty_res,
+                "ks": ks_res,
+                "psi": psi_res,
+                "target_shift": target_shift,
+            }
         )
         print("Data Synthetic")
         print(resultados.mean())
