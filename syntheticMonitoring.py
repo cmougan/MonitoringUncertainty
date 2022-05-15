@@ -34,14 +34,13 @@ plt.style.use("ggplot")
 import warnings
 from collections import defaultdict
 
-get_ipython().run_line_magic("matplotlib", "inline")
 from matplotlib import rcParams
-
-plt.style.use("seaborn-whitegrid")
-rcParams["axes.labelsize"] = 14
-rcParams["xtick.labelsize"] = 12
-rcParams["ytick.labelsize"] = 12
-rcParams["figure.figsize"] = 16, 8
+plt.style.use('seaborn-whitegrid')
+rcParams['axes.labelsize'] = 14
+rcParams['xtick.labelsize'] = 12
+rcParams['ytick.labelsize'] = 12
+rcParams['figure.figsize'] = 16,8
+rcParams.update({'font.size': 22})
 
 # Import internal classes
 from distributions import DistributionShift
@@ -68,7 +67,8 @@ df["target"] = df["Var1"] ** 2 + df["Var2"] + np.random.normal(0, 0.01, samples)
 def kol_smi(x):
     return ks_2samp(x, BASE_COMP).statistic
 
-
+def kol_smi_preds(x):
+    return ks_2samp(x, BASE_COMP_PREDS).statistic
 def psi_stat(x):
     return psi(x, BASE_COMP)
 
@@ -111,6 +111,7 @@ def monitoring_plot(
         uncertainty_res = []
         ks_res = []
         psi_res = []
+        target_shift = []
         for idx, col in tqdm(enumerate(X.columns), total=len(X.columns)):
             values = defaultdict(list)
 
@@ -125,6 +126,7 @@ def monitoring_plot(
             )
 
             # Predictions
+            preds_tr = regressor.predict(X_tr)
             preds, intervals = regressor.predict(
                 X_ood, uncertainty=0.05, n_boots=n_boots
             )
@@ -133,12 +135,8 @@ def monitoring_plot(
             df = pd.DataFrame(
                 intervals[:, 1] - intervals[:, 0], columns=["uncertainty"]
             )
-            # df['ood'] = y_ood.values
-            # df['preds'] = preds
             df["error"] = np.abs(preds - y_ood.values)
-            # df['X_tr'] = X_tr[col].values
-            # df['X_ood'] = X_ood[col].values
-            # return df
+
             ### KS Test
             df["ks"] = X_ood[col].values
             global BASE_COMP
@@ -153,10 +151,17 @@ def monitoring_plot(
                 .rolling(ROLLING_STAT, int(ROLLING_STAT * 0.5))
                 .apply(psi_stat)
             )  # Takes ages
+            # Label Shift
+            global BASE_COMP_PREDS
+            BASE_COMP_PREDS = preds_tr
+            df['target_shift'] = preds
+            df[["target_shift"]] = (
+                df[["target_shift"]].rolling(ROLLING_STAT, int(ROLLING_STAT * 0.5)).apply(kol_smi_preds)
+            ) 
 
             ### Rolling window on all
-            df[df.columns[~df.columns.isin(["ks", "PSI"])]] = (
-                df[df.columns[~df.columns.isin(["ks", "PSI"])]]
+            df[df.columns[~df.columns.isin(["ks", "PSI","target_shift"])]] = (
+                df[df.columns[~df.columns.isin(["ks", "PSI","target_shift"])]]
                 .rolling(ROLLING_STAT, int(ROLLING_STAT * 0.5))
                 .mean()
             ).dropna()
@@ -179,6 +184,7 @@ def monitoring_plot(
             )
             ks_res.append(mean_absolute_error(values["error"], values["ks"]))
             psi_res.append(mean_absolute_error(values["error"], values["PSI"]))
+            target_shift.append(mean_absolute_error(values["error"], values["target_shift"]))
 
             # Plotting
 
@@ -186,7 +192,7 @@ def monitoring_plot(
                 axs[idx].plot(vals, label=f"{name} values")
 
         resultados = pd.DataFrame(
-            {"uncertainy": uncertainty_res, "ks": ks_res, "psi": psi_res}
+            {"uncertainy": uncertainty_res, "ks": ks_res, "psi": psi_res, "target_shift": target_shift}
         )
         print("Data Synthetic")
         print(resultados.mean())
