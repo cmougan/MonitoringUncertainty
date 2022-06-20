@@ -1,5 +1,6 @@
 import numpy as np
 
+
 class ATC(object):
     def ATC_accuracy(
         self, source_probs, source_labels, target_probs, score_function="MC"
@@ -64,29 +65,24 @@ class ATC(object):
 
         return min_fp_fn, thres
 
-
-    #def fit(self, source_probs, source_labels, score_function="MC"):
+    # def fit(self, source_probs, source_labels, score_function="MC"):
     def fit(self, X, Y, score_function="MC"):
         self.score_function = score_function
         if self.score_function == "MC":
             source_score = np.max(X, axis=-1)
         elif self.score_function == "NE":
-            source_score = np.sum(
-                np.multiply(X, np.log(X + 1e-20)), axis=1
-            )
+            source_score = np.sum(np.multiply(X, np.log(X + 1e-20)), axis=1)
 
         source_preds = np.argmax(X, axis=-1)
 
         _, self.ATC_threshold = self.find_threshold_balance(
             source_score, Y == source_preds
         )
-    #def predict(self, target_probs):
+
+    # def predict(self, target_probs):
     def predict(self, X):
         if self.score_function == "MC":
             target_score = np.max(X, axis=-1)
         elif self.score_function == "NE":
-            target_score = np.sum(
-                np.multiply(X, np.log(X + 1e-20)), axis=1
-            )
+            target_score = np.sum(np.multiply(X, np.log(X + 1e-20)), axis=1)
         return np.mean(target_score >= self.ATC_threshold) * 100.0
-

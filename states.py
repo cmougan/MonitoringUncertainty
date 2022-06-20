@@ -20,13 +20,13 @@ import sys
 from mapie.regression import MapieRegressor
 
 
-
 sys.path.append("../")
 import random
 
 random.seed(0)
 
 import matplotlib.pyplot as plt
+
 # %%
 # Load data
 data_source = ACSDataSource(survey_year="2014", horizon="1-Year", survey="person")
@@ -44,7 +44,9 @@ mi_features = mi_features.head(2_000)
 mi_labels = mi_labels[:2_000]
 # %%
 # Modeling
-X_tr, X_te, y_tr, y_te =  train_test_split(ca_features, ca_labels, test_size=0.33, random_state=0)
+X_tr, X_te, y_tr, y_te = train_test_split(
+    ca_features, ca_labels, test_size=0.33, random_state=0
+)
 regressor = LinearRegression()
 alpha = [0.05, 0.95]
 mapie = MapieRegressor(regressor)
@@ -54,22 +56,22 @@ preds, intervals = mapie.predict(X_te, alpha=alpha)
 
 
 # %%
-mean_width = np.mean(intervals[:, 1] - intervals[:, 0],axis=1)
+mean_width = np.mean(intervals[:, 1] - intervals[:, 0], axis=1)
 mean_width = mean_width.reshape(-1, 1)
 
 # %%
 sc = StandardScaler()
 aux = X_te.copy()
-aux['preds'] = preds
-aux['unc'] = sc.fit_transform(mean_width)
-aux['unc'] = aux['unc'].rolling(window=100).mean().fillna(0)
-aux['error'] = sc.fit_transform(np.abs(preds-mi_labels).reshape(-1, 1))
-#aux['error'] = aux['error'].rolling(window=10).mean().fillna(0)
-aux = aux.sort_values(by='error')
+aux["preds"] = preds
+aux["unc"] = sc.fit_transform(mean_width)
+aux["unc"] = aux["unc"].rolling(window=100).mean().fillna(0)
+aux["error"] = sc.fit_transform(np.abs(preds - mi_labels).reshape(-1, 1))
+# aux['error'] = aux['error'].rolling(window=10).mean().fillna(0)
+aux = aux.sort_values(by="error")
 aux = aux.reset_index()
 
 # %%
 plt.figure()
-plt.plot(aux.unc,label='uncertainty')
-plt.plot(aux.error,label='error')
+plt.plot(aux.unc, label="uncertainty")
+plt.plot(aux.error, label="error")
 plt.legend()
