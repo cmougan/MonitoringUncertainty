@@ -108,3 +108,4 @@ xgboost==1.5.1
 tabulate==0.8.9
 mapie==0.3.2
 doubt==4.1.0
+folktables==0.0.11
