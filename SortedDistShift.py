@@ -1,93 +1,71 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[1]:
-
-
-get_ipython().run_cell_magic('javascript', '', 'utils.load_extension("execute_time/ExecuteTime")\nutils.load_extension(\'collapsible_headings/main\') ')
-
-
-# In[2]:
-
-
+# %%
 # Import candidate models
-from doubt import Boot, QuantileRegressor, QuantileRegressionForest
-from sklearn.linear_model import (LinearRegression, PoissonRegressor, 
-                                  GammaRegressor, HuberRegressor)
+from doubt import Boot
+from sklearn.linear_model import LinearRegression, PoissonRegressor, GammaRegressor
 from sklearn.ensemble import RandomForestRegressor
-from sklearn.svm import LinearSVR
+
 from sklearn.neural_network import MLPRegressor
 from sklearn.preprocessing import StandardScaler
 from sklearn.tree import DecisionTreeRegressor
 from sklearn.metrics import mean_absolute_error
 
 # Import datasets
-from doubt.datasets import (Airfoil, Blog, Concrete, CPU, 
-                            FacebookComments, FishBioconcentration,
-                            FishToxicity, ForestFire, NewTaipeiHousing,
-                            PowerPlant, Protein, Servo,
-                            SpaceShuttle, Yacht)
+from doubt.datasets import (
+    Airfoil,
+    Concrete,
+    FishToxicity,
+    ForestFire,
+    NewTaipeiHousing,
+    PowerPlant,
+    Protein,
+)
 
 # Import external libraries
 import pandas as pd
 import numpy as np
-from tqdm.auto import tqdm, trange
-from scipy.stats import ks_2samp, entropy, kruskal
-import matplotlib.pyplot as plt; plt.style.use('ggplot')
+from tqdm.auto import tqdm
+from scipy.stats import ks_2samp
+import matplotlib.pyplot as plt
+from mapie.regression import MapieRegressor
+
+plt.style.use("seaborn-whitegrid")
 
 
 import warnings
 from collections import defaultdict
-get_ipython().run_line_magic('matplotlib', 'inline')
+
 from matplotlib import rcParams
-plt.style.use('seaborn-whitegrid')
-rcParams['axes.labelsize'] = 14
-rcParams['xtick.labelsize'] = 12
-rcParams['ytick.labelsize'] = 12
-rcParams['figure.figsize'] = 16,8
-rcParams.update({'font.size': 22})
+
+rcParams["axes.labelsize"] = 14
+rcParams["xtick.labelsize"] = 12
+rcParams["ytick.labelsize"] = 12
+rcParams["figure.figsize"] = 16, 8
+rcParams.update({"font.size": 22})
 
 # Import internal classes
-from distributions import DistributionShift
 from src.psi import psi
 from tqdm.notebook import tqdm
 
-
-# In[3]:
-
-
 from xgboost import XGBRegressor
-from tabulate import tabulate
 
 
-# In[4]:
-
-
+# %%
 dataset_classes = [
     Airfoil,
-    #Concrete,
-    #FishToxicity,
-    #ForestFire,
-    #NewTaipeiHousing,
-    #PowerPlant,
-    #Protein,
-    #Servo,
+    # Concrete,
+    # FishToxicity,
+    # ForestFire,
+    # PowerPlant,
+    # NewTaipeiHousing,
+    # Protein,
 ]
-
-
-# In[5]:
-
-
+# %%
 for dataset in dataset_classes:
-    print(dataset().shape)
+    print(dataset.__name__, dataset().shape)
 
 
-# In[6]:
-
-
-def initialise_plot(
-    num_rows: int, num_cols: int, base_regressor: type, dataset
-):
+# %%
+def initialise_plot(num_rows: int, num_cols: int, base_regressor: type, dataset):
     fig, axs = plt.subplots(
         num_rows,
         num_cols,
@@ -106,13 +84,17 @@ def initialise_plot(
     return fig, axs
 
 
-# In[13]:
+# %%
 
 
 def kol_smi(x):
     return ks_2samp(x, BASE_COMP).statistic
+
+
 def kol_smi_preds(x):
     return ks_2samp(x, BASE_COMP_PREDS).statistic
+
+
 def psi_stat(x):
     return psi(x, BASE_COMP)
 
@@ -163,6 +145,7 @@ def monitoring_plot(
         )
 
         uncertainty_res = []
+        uncertainty_m_res = []
         ks_res = []
         psi_res = []
         target_shift = []
@@ -197,10 +180,18 @@ def monitoring_plot(
                 X_tot, uncertainty=0.05, n_boots=n_boots
             )
 
+            mapie = MapieRegressor(base_regressor(**kwargs))
+
+            mapie.fit(X_tr, y_tr)
+            preds_m, intervals_m = mapie.predict(X_tot, alpha=[0.05])
+
             # Statistics
             df = pd.DataFrame(
                 intervals[:, 1] - intervals[:, 0], columns=["uncertainty"]
             )
+
+            df["uncertainty_m"] = intervals_m[:, 1] - intervals_m[:, 0]
+
             df["error"] = np.abs(preds - y_tot)
 
             ### KS Test
@@ -245,6 +236,9 @@ def monitoring_plot(
             uncertainty_res.append(
                 mean_absolute_error(values["error"], values["uncertainty"])
             )
+            uncertainty_m_res.append(
+                mean_absolute_error(values["error"], values["uncertainty_m"])
+            )
             ks_res.append(mean_absolute_error(values["error"], values["ks"]))
             psi_res.append(mean_absolute_error(values["error"], values["PSI"]))
             target_shift.append(
@@ -260,7 +254,8 @@ def monitoring_plot(
                         axs[idx // 3, idx % 3].plot(vals)
         resultados = pd.DataFrame(
             {
-                "uncertainy": uncertainty_res,
+                "uncertainty": uncertainty_res,
+                "uncertainty_m": uncertainty_m_res,
                 "ks": ks_res,
                 "psi": psi_res,
                 "target_shift": target_shift,
@@ -277,92 +272,69 @@ def monitoring_plot(
         return resultados
 
 
-# In[19]:
+# %%
 
-
+print("Linear Regression")
 for dataset in dataset_classes:
-    monitoring_plot(dataset,LinearRegression)
-
-
-# In[ ]:
-
-
+    monitoring_plot(dataset, LinearRegression)
+# %%
+print("Poisson Regressor")
 for dataset in dataset_classes:
-    monitoring_plot(dataset,PoissonRegressor)
-
-
-# In[ ]:
-
-
+    monitoring_plot(dataset, PoissonRegressor)
+# %%
+print("Gamma Regressor")
 for dataset in dataset_classes:
-    monitoring_plot(dataset,GammaRegressor)
-
-
-# In[ ]:
-
-
+    monitoring_plot(dataset, GammaRegressor)
+# %%
+print("Decision Tree Regressor Depth 20")
 for dataset in dataset_classes:
-    monitoring_plot(dataset,DecisionTreeRegressor,max_depth=20)
-
-
-# In[ ]:
-
-
+    monitoring_plot(dataset, DecisionTreeRegressor, max_depth=20)
+# %%
+print("Decision Tree Regressor Depth 10")
 for dataset in dataset_classes:
-    monitoring_plot(dataset,DecisionTreeRegressor,max_depth=10)
-
-
-# In[ ]:
-
-
+    monitoring_plot(dataset, DecisionTreeRegressor, max_depth=10)
+# %%
+print("Random Forest Regressor")
 for dataset in dataset_classes:
-    monitoring_plot(dataset,RandomForestRegressor,n_estimators = 20)
-
-
-# In[ ]:
-
-
+    monitoring_plot(dataset, RandomForestRegressor, n_estimators=20)
+# %%
+print("XGBoost Regressor")
 for dataset in dataset_classes:
-    monitoring_plot(dataset,XGBRegressor)
-
-
-# In[ ]:
-
-
+    monitoring_plot(dataset, XGBRegressor)
+# %%
+print("MLP Regressor")
 for dataset in dataset_classes:
-    monitoring_plot(dataset,MLPRegressor)
+    monitoring_plot(dataset, MLPRegressor)
 
-
+# %%
+"""
 # ## Rolling window experiment
-
-# In[ ]:
-
-
 dfs = {}
 for dataset in dataset_classes:
     uncertainty_loop = []
     ks_loop = []
     psi_loop = []
-    params = np.array(range(20,400,20))
+    params = np.array(range(20, 400, 20))
     for rs in params:
         if dataset().shape[0] / 3 > rs:
             print(rs)
-            res = monitoring_plot(dataset, LinearRegression, ROLLING_STAT=rs,plot=False)
+            res = monitoring_plot(
+                dataset, LinearRegression, ROLLING_STAT=rs, plot=False
+            )
             uncertainty_loop.append(res.loc["mean"][0])
             ks_loop.append(res.loc["mean"][1])
             psi_loop.append(res.loc["mean"][2])
 
-    agg = pd.DataFrame([uncertainty_loop,ks_loop,psi_loop,params]).T
-    agg.columns = ['uncertainty','ks','psi','parameters']
-    dfs[dataset.__name__]=agg
-
-
-# In[ ]:
+    agg = pd.DataFrame([uncertainty_loop, ks_loop, psi_loop, params]).T
+    agg.columns = ["uncertainty", "ks", "psi", "parameters"]
+    dfs[dataset.__name__] = agg
 
 
 
 fig, axs = plt.subplots(1, len(dfs))
-fig.suptitle("Impact of rolling window size over unsupervised model monitoring techniques")
+fig.suptitle(
+    "Impact of rolling window size over unsupervised model monitoring techniques"
+)
 for idx, key in enumerate(dfs.keys()):
     axs[idx].title.set_text("Dataset:{}".format(key))
     dt = dfs[key]
@@ -370,9 +342,9 @@ for idx, key in enumerate(dfs.keys()):
     axs[idx].plot(dt["params"], dt["uncertainty"].values, label="Uncertainty")
     axs[idx].plot(dt["params"], dt["ks"].values, label="K-S")
     axs[idx].plot(dt["params"], dt["psi"].values, label="PSI")
-    if idx ==2:
+    if idx == 2:
         axs[idx].legend(bbox_to_anchor=(1, 1))
 
 
 plt.show()
-
+"""
