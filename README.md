@@ -38,3 +38,8 @@ SortedDistShift.ipynb
 
 ## Detecting the source of uncertainty
 The notebook for this experiment is xAIUncertainty.ipynb
+
+## Experiments on synthetic data
+
+Monitoring `syntheticMonitoring.py`
+Explainable AI `syntheticxAI.py`
