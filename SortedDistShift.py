@@ -12,12 +12,29 @@ from sklearn.metrics import mean_absolute_error
 # Import datasets
 from doubt.datasets import (
     Airfoil,
+    BikeSharingDaily,
+    BikeSharingHourly,
+    Blog,
     Concrete,
+    CPU,
+    FacebookComments,
+    FacebookMetrics,
+    FishBioconcentration,
     FishToxicity,
     ForestFire,
+    GasTurbine,
+    Nanotube,
     NewTaipeiHousing,
+    Parkinsons,
     PowerPlant,
     Protein,
+    Servo,
+    SolarFlare,
+    SpaceShuttle,
+    Stocks,
+    Superconductivity,
+    TehranHousing,
+    Yacht,
 )
 
 # Import external libraries
@@ -52,12 +69,15 @@ from xgboost import XGBRegressor
 # %%
 dataset_classes = [
     Airfoil,
-    # Concrete,
-    # FishToxicity,
-    # ForestFire,
-    # PowerPlant,
-    # NewTaipeiHousing,
-    # Protein,
+    BikeSharingHourly,
+    Concrete,
+    FishToxicity,
+    ForestFire,
+    Nanotube,
+    Parkinsons,
+    PowerPlant,
+    Protein,
+    SolarFlare,
 ]
 # %%
 for dataset in dataset_classes:
