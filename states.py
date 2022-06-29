@@ -54,11 +54,9 @@ X_te = mi_features
 mapie.fit(X_tr, y_tr)
 preds, intervals = mapie.predict(X_te, alpha=alpha)
 
-
 # %%
 mean_width = np.mean(intervals[:, 1] - intervals[:, 0], axis=1)
 mean_width = mean_width.reshape(-1, 1)
-
 # %%
 sc = StandardScaler()
 aux = X_te.copy()
@@ -69,7 +67,6 @@ aux["error"] = sc.fit_transform(np.abs(preds - mi_labels).reshape(-1, 1))
 # aux['error'] = aux['error'].rolling(window=10).mean().fillna(0)
 aux = aux.sort_values(by="error")
 aux = aux.reset_index()
-
 # %%
 plt.figure()
 plt.plot(aux.unc, label="uncertainty")
