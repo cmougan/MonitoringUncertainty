@@ -71,10 +71,12 @@ dataset_classes = [
     Airfoil,
     Concrete,
     ForestFire,
-    Nanotube,
     Parkinsons,
     PowerPlant,
     Protein,
+    BikeSharingHourly,
+    FishToxicity,
+    Nanotube,
 ]
 # %%
 for dataset in dataset_classes:
@@ -143,7 +145,12 @@ def monitoring_plot(
         # Back to dataframe
         X = pd.DataFrame(X, columns=["Var %d" % (i + 1) for i in range(X.shape[1])])
         data = X.copy()
-        data["target"] = y
+
+        # Some datasets have multilabel, we stick to the first one.
+        try:
+            data["target"] = y
+        except:
+            data["target"] = y[:, 0]
 
         # Train test splitting points
         fracc = 0.33
@@ -290,7 +297,6 @@ def monitoring_plot(
 
 
 # %%
-
 print("Linear Regression")
 for dataset in dataset_classes:
     monitoring_plot(dataset, LinearRegression)
