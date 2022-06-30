@@ -174,6 +174,8 @@ def monitoring_plot(
         psi_res = []
         target_shift = []
         for idx, col in tqdm(enumerate(X.columns), total=len(X.columns)):
+            if idx > 9:  # Limit in columns
+                continue
             values = defaultdict(list)
 
             # Sort data on the column
