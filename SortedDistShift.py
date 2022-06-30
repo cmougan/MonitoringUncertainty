@@ -69,7 +69,6 @@ from xgboost import XGBRegressor
 # %%
 dataset_classes = [
     Airfoil,
-    BikeSharingHourly,
     Concrete,
     ForestFire,
     Nanotube,
