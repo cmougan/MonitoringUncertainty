@@ -71,13 +71,11 @@ dataset_classes = [
     Airfoil,
     BikeSharingHourly,
     Concrete,
-    FishToxicity,
     ForestFire,
     Nanotube,
     Parkinsons,
     PowerPlant,
     Protein,
-    SolarFlare,
 ]
 # %%
 for dataset in dataset_classes:
