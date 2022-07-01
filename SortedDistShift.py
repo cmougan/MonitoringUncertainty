@@ -301,16 +301,16 @@ def monitoring_plot(
 
 # %%
 print("Linear Regression")
-for dataset in dataset_classes:
-    monitoring_plot(dataset, LinearRegression)
+# for dataset in dataset_classes:
+#    monitoring_plot(dataset, LinearRegression)
 # %%
 print("Poisson Regressor")
-for dataset in dataset_classes:
-    monitoring_plot(dataset, PoissonRegressor)
+# for dataset in dataset_classes:
+#    monitoring_plot(dataset, PoissonRegressor)
 # %%
 print("Decision Tree Regressor Depth 10")
-for dataset in dataset_classes:
-    monitoring_plot(dataset, DecisionTreeRegressor, max_depth=10)
+# for dataset in dataset_classes:
+#    monitoring_plot(dataset, DecisionTreeRegressor, max_depth=10)
 # %%
 print("Random Forest Regressor")
 for dataset in dataset_classes:
