@@ -68,15 +68,15 @@ from xgboost import XGBRegressor
 
 # %%
 dataset_classes = [
-    # Airfoil,
-    # Concrete,
-    # ForestFire,
-    # Parkinsons,
-    # PowerPlant,
-    Protein,
-    BikeSharingHourly,
-    FishToxicity,
-    Nanotube,
+    Airfoil,
+    Concrete,
+    ForestFire,
+    Parkinsons,
+    PowerPlant,
+    # Protein,
+    # BikeSharingHourly,
+    # FishToxicity,
+    # Nanotube,
 ]
 for dataset in dataset_classes:
     print(dataset.__name__, dataset().shape)
