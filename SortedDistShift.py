@@ -308,14 +308,6 @@ print("Poisson Regressor")
 for dataset in dataset_classes:
     monitoring_plot(dataset, PoissonRegressor)
 # %%
-print("Gamma Regressor")
-for dataset in dataset_classes:
-    monitoring_plot(dataset, GammaRegressor)
-# %%
-print("Decision Tree Regressor Depth 20")
-for dataset in dataset_classes:
-    monitoring_plot(dataset, DecisionTreeRegressor, max_depth=20)
-# %%
 print("Decision Tree Regressor Depth 10")
 for dataset in dataset_classes:
     monitoring_plot(dataset, DecisionTreeRegressor, max_depth=10)
