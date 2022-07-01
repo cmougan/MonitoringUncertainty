@@ -68,17 +68,16 @@ from xgboost import XGBRegressor
 
 # %%
 dataset_classes = [
-    Airfoil,
-    Concrete,
-    ForestFire,
-    Parkinsons,
-    PowerPlant,
+    # Airfoil,
+    # Concrete,
+    # ForestFire,
+    # Parkinsons,
+    # PowerPlant,
     Protein,
     BikeSharingHourly,
     FishToxicity,
     Nanotube,
 ]
-# %%
 for dataset in dataset_classes:
     print(dataset.__name__, dataset().shape)
 
@@ -173,7 +172,9 @@ def monitoring_plot(
         ks_res = []
         psi_res = []
         target_shift = []
-        for idx, col in tqdm(enumerate(X.columns), total=len(X.columns)):
+        for idx, col in tqdm(
+            enumerate(X.columns), total=len(X.columns), desc="Columns"
+        ):
             if idx > 9:  # Limit in columns
                 continue
             values = defaultdict(list)
