@@ -68,11 +68,11 @@ from xgboost import XGBRegressor
 
 # %%
 dataset_classes = [
-    # Airfoil,
-    # Concrete,
-    # ForestFire,
-    # Parkinsons,
-    # PowerPlant,
+    Airfoil,
+    Concrete,
+    ForestFire,
+    Parkinsons,
+    PowerPlant,
     Protein,
     BikeSharingHourly,
     FishToxicity,
@@ -80,8 +80,9 @@ dataset_classes = [
 for dataset in dataset_classes:
     print(dataset.__name__, dataset().shape)
 
+    # %%
 
-# %%
+
 def initialise_plot(num_rows: int, num_cols: int, base_regressor: type, dataset):
     fig, axs = plt.subplots(
         num_rows,
@@ -300,28 +301,28 @@ def monitoring_plot(
 
 # %%
 print("Linear Regression")
-# for dataset in dataset_classes:
-#    monitoring_plot(dataset, LinearRegression)
+for dataset in dataset_classes:
+    monitoring_plot(dataset, LinearRegression)
 # %%
 print("Poisson Regressor")
-# for dataset in dataset_classes:
-#    monitoring_plot(dataset, PoissonRegressor)
+for dataset in dataset_classes:
+    monitoring_plot(dataset, PoissonRegressor)
 # %%
 print("Decision Tree Regressor Depth 10")
 for dataset in dataset_classes:
     monitoring_plot(dataset, DecisionTreeRegressor, max_depth=10)
 # %%
 print("Random Forest Regressor")
-# for dataset in dataset_classes:
-#    monitoring_plot(dataset, RandomForestRegressor, n_estimators=20)
+for dataset in dataset_classes:
+    monitoring_plot(dataset, RandomForestRegressor, n_estimators=20)
 # %%
 print("XGBoost Regressor")
-# for dataset in dataset_classes:
-#    monitoring_plot(dataset, XGBRegressor)
+for dataset in dataset_classes:
+    monitoring_plot(dataset, XGBRegressor)
 # %%
 print("MLP Regressor")
-# for dataset in dataset_classes:
-#    monitoring_plot(dataset, MLPRegressor)
+for dataset in dataset_classes:
+    monitoring_plot(dataset, MLPRegressor)
 
 # %%
 """
