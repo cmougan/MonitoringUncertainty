@@ -6,7 +6,7 @@ from doubt import Boot
 from sklearn.linear_model import (
     Lasso,
 )
-
+from mapie.regression import MapieRegressor
 from sklearn.preprocessing import StandardScaler
 
 from sklearn.metrics import mean_absolute_error
@@ -106,6 +106,7 @@ def monitoring_plot(
         # fig.suptitle(f"Monitoring plot for synthetic data under feature drift with {base_regressor.__name__}",fontsize=16,)
 
         uncertainty_res = []
+        uncertainty_m_res = []
         ks_res = []
         psi_res = []
         target_shift = []
@@ -127,11 +128,16 @@ def monitoring_plot(
             preds, intervals = regressor.predict(
                 X_ood, uncertainty=0.05, n_boots=n_boots
             )
+            # Mapie
+            mapie = MapieRegressor(base_regressor(**kwargs))
+            mapie.fit(X_tr, y_tr)
+            preds_m, intervals_m = mapie.predict(X_ood, alpha=[0.05])
 
             # Statistics
             df = pd.DataFrame(
                 intervals[:, 1] - intervals[:, 0], columns=["uncertainty"]
             )
+            df["uncertainty_m"] = intervals_m[:, 1] - intervals_m[:, 0]
             df["error"] = np.abs(preds - y_ood.values)
 
             ### KS Test
@@ -181,6 +187,9 @@ def monitoring_plot(
             uncertainty_res.append(
                 mean_absolute_error(values["error"], values["uncertainty"])
             )
+            uncertainty_m_res.append(
+                mean_absolute_error(values["error"], values["uncertainty_m"])
+            )
             ks_res.append(mean_absolute_error(values["error"], values["ks"]))
             psi_res.append(mean_absolute_error(values["error"], values["PSI"]))
             target_shift.append(
@@ -195,6 +204,7 @@ def monitoring_plot(
         resultados = pd.DataFrame(
             {
                 "uncertainy": uncertainty_res,
+                "uncertainty_m": uncertainty_m_res,
                 "ks": ks_res,
                 "psi": psi_res,
                 "target_shift": target_shift,
@@ -217,8 +227,3 @@ def monitoring_plot(
 
 # %%
 a = monitoring_plot(df, Lasso, alpha=0.00001)
-
-# %%
-a
-
-# %%
