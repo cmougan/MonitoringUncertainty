@@ -106,5 +106,5 @@ zipp==3.4.1
 xgboost==1.5.1
 tabulate==0.8.9
 mapie==0.3.0
-doubt==4.1.0
+doubt==4.3.0
 folktables==0.0.11
