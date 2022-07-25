@@ -34,3 +34,7 @@ install_some_packages:
 
 test:
 	python -m pytest tests
+
+computationalPerformance:
+	python ComputationalPerformance.py
+	python experiments/analyzeComputationalPerformance.py
