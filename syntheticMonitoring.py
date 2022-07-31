@@ -12,6 +12,7 @@ from src.estimators import evaluate_nasa, evaluate_doubt, evaluate_mapie
 from sklearn.metrics import mean_absolute_error
 from sklearn.model_selection import train_test_split
 import random
+import pdb
 
 random.seed(0)
 
@@ -116,20 +117,21 @@ def monitoring_plot(
             )
 
             # Predictions
-            # preds_tr = regressor.predict(X_tr)
             base_model = base_regressor(**kwargs)
             base_model.fit(X_tr, y_tr)
+            preds_tr = base_model.predict(X_tr)
             preds = base_model.predict(X_ood)
-
             ## Doubt
             _, intervals = evaluate_doubt(
                 model=base_regressor(**kwargs),
                 X_tr=X_tr,
                 X_te=X_ood,
-                y_tr=y_tr,
+                y_tr=y_tr.target.values,
                 y_te=y_ood,
                 uncertainty=0.05,
+                desaggregated=True,
             )
+
             # Mapie
             mapie = MapieRegressor(base_regressor(**kwargs))
             mapie.fit(X_tr, y_tr)
@@ -137,9 +139,10 @@ def monitoring_plot(
                 model=base_regressor(**kwargs),
                 X_tr=X_tr,
                 X_te=X_ood,
-                y_tr=y_tr,
+                y_tr=y_tr.target.values,
                 y_te=y_ood,
-                uncertainty=0.05,
+                uncertainty=[0.05],
+                desaggregated=True,
             )
             # Nasa
 
@@ -237,3 +240,7 @@ def monitoring_plot(
 
 # %%
 a = monitoring_plot(df, Lasso, alpha=0.00001)
+
+# %%
+a
+# %%
