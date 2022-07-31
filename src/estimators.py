@@ -8,7 +8,7 @@ rng = np.random.default_rng(4242)
 random.seed(0)
 
 
-def evaluate_nasa(model, X_tr, X_te, y_tr, y_te, uncertainty=0.05):
+def evaluate_nasa(model, X_tr, X_te, y_tr, y_te, uncertainty=0.05, desaggregated=False):
     n_boots = int(np.sqrt(len(X_tr)))
 
     # Calculate training residuals
@@ -45,29 +45,40 @@ def evaluate_nasa(model, X_tr, X_te, y_tr, y_te, uncertainty=0.05):
     intervals = np.expand_dims(te_preds, -1) + np.transpose(
         np.quantile(C, q=[uncertainty / 2, 1 - uncertainty / 2], axis=0)
     )
+    if desaggregated:
+        return bootstrap_preds, intervals
 
     coverage = np.mean((y_te > intervals[:, 0]) & (y_te < intervals[:, 1]))
     mean_width = np.mean(intervals[:, 1] - intervals[:, 0])
     return coverage, mean_width
 
 
-def evaluate_doubt(model, X_tr, X_te, y_tr, y_te, uncertainty=0.05):
+def evaluate_doubt(
+    model, X_tr, X_te, y_tr, y_te, uncertainty=0.05, desaggregated=False
+):
     n_boots = int(np.sqrt(len(X_tr)))
 
     bmodel = Boot(model, random_seed=4242)
     bmodel.fit(X_tr, y_tr, n_boots=n_boots)
     preds, intervals = bmodel.predict(X_te, uncertainty=uncertainty, n_boots=n_boots)
 
+    if desaggregated:
+        return preds, intervals
     coverage = np.mean((y_te > intervals[:, 0]) & (y_te < intervals[:, 1]))
     mean_width = np.mean(intervals[:, 1] - intervals[:, 0])
     return coverage, mean_width
 
 
-def evaluate_mapie(model, X_tr, X_te, y_tr, y_te, uncertainty=0.05):
+def evaluate_mapie(
+    model, X_tr, X_te, y_tr, y_te, uncertainty=0.05, desaggregated=False
+):
     n_boots = int(np.sqrt(len(X_tr)))
     bmodel = MapieRegressor(model, cv=n_boots)
     bmodel.fit(X_tr, y_tr)
     preds, intervals = bmodel.predict(X_te, alpha=uncertainty)
+
+    if desaggregated:
+        return preds, intervals
 
     coverage = np.mean((y_te > intervals[:, 0, 0]) & (y_te < intervals[:, 1, 0]))
     mean_width = np.mean(intervals[:, 1] - intervals[:, 0])
