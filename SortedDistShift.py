@@ -1,4 +1,6 @@
 # %%
+import pdb
+
 # Import candidate models
 from doubt import Boot
 from sklearn.linear_model import LinearRegression, PoissonRegressor, GammaRegressor
@@ -10,6 +12,7 @@ from sklearn.tree import DecisionTreeRegressor
 from sklearn.metrics import mean_absolute_error
 
 # Import datasets
+from src.estimators import evaluate_nasa, evaluate_doubt, evaluate_mapie
 from doubt.datasets import (
     Airfoil,
     BikeSharingDaily,
@@ -169,6 +172,7 @@ def monitoring_plot(
 
         uncertainty_res = []
         uncertainty_m_res = []
+        uncertainty_n_res = []
         ks_res = []
         psi_res = []
         target_shift = []
@@ -200,36 +204,59 @@ def monitoring_plot(
             # Fit the regressor
             regressor = Boot(base_regressor(**kwargs))
             regressor.fit(X_tr, y_tr, n_boots=20)
-
             # Predictions
-            preds_tr = regressor.predict(X_tr)
-            preds, intervals = regressor.predict(
-                X_tot, uncertainty=0.05, n_boots=n_boots
+            base_model = base_regressor(**kwargs)
+            base_model.fit(X_tr, y_tr)
+            preds_tr = base_model.predict(X_tr)
+            preds = base_model.predict(X_tot)
+            ## Doubt
+            _, intervals = evaluate_doubt(
+                model=base_regressor(**kwargs),
+                X_tr=X_tr,
+                X_te=X_tot,
+                y_tr=y_tr,
+                y_te=y_tot,
+                uncertainty=0.05,
+                desaggregated=True,
             )
 
-            mapie = MapieRegressor(base_regressor(**kwargs))
-
-            mapie.fit(X_tr, y_tr)
-            preds_m, intervals_m = mapie.predict(X_tot, alpha=[0.05])
-
+            # Mapie
+            _, intervals_m = evaluate_mapie(
+                model=base_regressor(**kwargs),
+                X_tr=X_tr,
+                X_te=X_tot,
+                y_tr=y_tr,
+                y_te=y_tot,
+                uncertainty=[0.05],
+                desaggregated=True,
+            )
+            # Nasa
+            _, intervals_n = evaluate_nasa(
+                model=base_regressor(**kwargs),
+                X_tr=X_tr,
+                X_te=X_tot,
+                y_tr=y_tr,
+                y_te=y_tot,
+                uncertainty=0.05,
+                desaggregated=True,
+            )
             # Statistics
             df = pd.DataFrame(
                 intervals[:, 1] - intervals[:, 0], columns=["uncertainty"]
             )
-
             df["uncertainty_m"] = intervals_m[:, 1] - intervals_m[:, 0]
-
+            df["uncertainty_n"] = intervals_n[:, 1] - intervals_n[:, 0]
             df["error"] = np.abs(preds - y_tot)
 
             ### KS Test
-            df["ks"] = data[col]
+            df["ks"] = X_tot[col].values
             global BASE_COMP
-            BASE_COMP = data[col]
+            BASE_COMP = X_tr[col].values
             df[["ks"]] = (
                 df[["ks"]].rolling(ROLLING_STAT, int(ROLLING_STAT * 0.5)).apply(kol_smi)
             )  # Takes ages
             ### PSI Test
-            df["PSI"] = data[col]
+            df["PSI"] = X_tot[col].values
             df[["PSI"]] = (
                 df[["PSI"]]
                 .rolling(ROLLING_STAT, int(ROLLING_STAT * 0.5))
@@ -243,7 +270,7 @@ def monitoring_plot(
                 df[["target_shift"]]
                 .rolling(ROLLING_STAT, int(ROLLING_STAT * 0.5))
                 .apply(kol_smi_preds)
-            )  # Takes ages
+            )
 
             ### Rolling window on all
             df[df.columns[~df.columns.isin(["ks", "PSI", "target_shift"])]] = (
@@ -254,17 +281,32 @@ def monitoring_plot(
 
             ## Scaling
             df = df.dropna()
-            df = pd.DataFrame(standard_scaler.fit_transform(df), columns=df.columns)
+            try:
+                check_is_fitted(standard_scaler)
+                df = pd.DataFrame(standard_scaler.transform(df), columns=df.columns)
+            except:
+                standard_scaler.fit(df)
+                df = pd.DataFrame(standard_scaler.transform(df), columns=df.columns)
 
             # Convert to dic for plotting
+            df = df.rename(
+                columns={
+                    "uncertainty_m": "Mapie",
+                    "uncertainty_n": "Nasa",
+                    "uncertainty": "Doubt",
+                }
+            )
             for index, col in enumerate(df.columns):
                 values[col] = df[col]
 
             uncertainty_res.append(
-                mean_absolute_error(values["error"], values["uncertainty"])
+                mean_absolute_error(values["error"], values["Doubt"])
             )
             uncertainty_m_res.append(
-                mean_absolute_error(values["error"], values["uncertainty_m"])
+                mean_absolute_error(values["error"], values["Mapie"])
+            )
+            uncertainty_n_res.append(
+                mean_absolute_error(values["error"], values["Nasa"])
             )
             ks_res.append(mean_absolute_error(values["error"], values["ks"]))
             psi_res.append(mean_absolute_error(values["error"], values["PSI"]))
@@ -279,23 +321,24 @@ def monitoring_plot(
                         axs[idx // 3, idx % 3].plot(vals, label=f"{name} values")
                     else:
                         axs[idx // 3, idx % 3].plot(vals)
+
         resultados = pd.DataFrame(
             {
-                "uncertainty": uncertainty_res,
-                "uncertainty_m": uncertainty_m_res,
+                "Doubt": uncertainty_res,
+                "Mapie": uncertainty_m_res,
+                "Nasa": uncertainty_n_res,
                 "ks": ks_res,
                 "psi": psi_res,
                 "target_shift": target_shift,
             }
         )
-        print("Data", dataset.__name__)
+        print("Data Synthetic")
         print(resultados.mean())
         resultados.loc["mean"] = resultados.mean()
 
         if plot:
             fig.legend()
-            plt.savefig("fig.png")
-            plt.show()
+            plt.savefig("experiments/fig.png")
         return resultados
 
 
