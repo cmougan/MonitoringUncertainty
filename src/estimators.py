@@ -2,6 +2,7 @@ import numpy as np
 import random
 from doubt import Boot
 from mapie.regression import MapieRegressor
+import pdb
 
 # Initialise random number generator
 rng = np.random.default_rng(4242)
@@ -27,8 +28,8 @@ def evaluate_nasa(model, X_tr, X_te, y_tr, y_te, uncertainty=0.05, desaggregated
     bootstrap_preds = np.empty((n_boots, n_test))
     for boot_idx in range(n_boots):
         train_idxs = rng.choice(range(n_train), size=n_train, replace=True)
-        X_btr = X_tr[train_idxs, :]
-        y_btr = y_tr[train_idxs]
+        X_btr = X_tr.values[train_idxs, :]
+        y_btr = y_tr.values[train_idxs]
 
         model.fit(X_btr, y_btr)
 
