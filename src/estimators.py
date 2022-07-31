@@ -11,6 +11,7 @@ random.seed(0)
 
 def evaluate_nasa(model, X_tr, X_te, y_tr, y_te, uncertainty=0.05, desaggregated=False):
     n_boots = int(np.sqrt(len(X_tr)))
+    n_boots = 20
 
     # Calculate training residuals
     model.fit(X_tr, y_tr)
@@ -58,6 +59,7 @@ def evaluate_doubt(
     model, X_tr, X_te, y_tr, y_te, uncertainty=0.05, desaggregated=False
 ):
     n_boots = int(np.sqrt(len(X_tr)))
+    n_boots = 20
 
     bmodel = Boot(model, random_seed=4242)
     bmodel.fit(X_tr, y_tr, n_boots=n_boots)
@@ -74,6 +76,7 @@ def evaluate_mapie(
     model, X_tr, X_te, y_tr, y_te, uncertainty=0.05, desaggregated=False
 ):
     n_boots = int(np.sqrt(len(X_tr)))
+    n_boots = 20
     bmodel = MapieRegressor(model, cv=n_boots)
     bmodel.fit(X_tr, y_tr)
     preds, intervals = bmodel.predict(X_te, alpha=uncertainty)
