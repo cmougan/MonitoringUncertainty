@@ -8,7 +8,7 @@ from sklearn.linear_model import (
 )
 from mapie.regression import MapieRegressor
 from sklearn.preprocessing import StandardScaler
-
+from src.estimators import evaluate_nasa, evaluate_doubt, evaluate_mapie
 from sklearn.metrics import mean_absolute_error
 from sklearn.model_selection import train_test_split
 import random
@@ -46,7 +46,7 @@ from tabulate import tabulate
 
 ## Create variables
 ### Normal
-samples = 10_000
+samples = 10_00
 x1 = np.random.normal(1, 0.1, size=samples)
 x2 = np.random.normal(1, 0.1, size=samples)
 x3 = np.random.normal(1, 0.1, size=samples)
@@ -56,8 +56,6 @@ df = pd.DataFrame(data=[x1, x2, x3]).T
 df.columns = ["Var%d" % (i + 1) for i in range(df.shape[1])]
 df["target"] = df["Var1"] ** 2 + df["Var2"] + np.random.normal(0, 0.01, samples)
 # %%
-
-
 def kol_smi(x):
     return ks_2samp(x, BASE_COMP).statistic
 
@@ -78,7 +76,6 @@ def monitoring_plot(
     plot: bool = True,
     **kwargs,
 ):
-
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
         standard_scaler = StandardScaler()
@@ -90,12 +87,7 @@ def monitoring_plot(
         # Train test splitting points
         X_tr, X_te, y_tr, y_te = train_test_split(X, y, train_size=0.5)
 
-        # Fit the regressor
-        regressor = Boot(base_regressor(**kwargs))
-        regressor.fit(X_tr, y_tr.target.values, n_boots=20)
-
         # Initialize plots
-
         fig, axs = plt.subplots(
             1,
             3,
@@ -124,14 +116,32 @@ def monitoring_plot(
             )
 
             # Predictions
-            preds_tr = regressor.predict(X_tr)
-            preds, intervals = regressor.predict(
-                X_ood, uncertainty=0.05, n_boots=n_boots
+            # preds_tr = regressor.predict(X_tr)
+            base_model = base_regressor(**kwargs)
+            base_model.fit(X_tr, y_tr)
+            preds = base_model.predict(X_ood)
+
+            ## Doubt
+            _, intervals = evaluate_doubt(
+                model=base_regressor(**kwargs),
+                X_tr=X_tr,
+                X_te=X_ood,
+                y_tr=y_tr,
+                y_te=y_ood,
+                uncertainty=0.05,
             )
             # Mapie
             mapie = MapieRegressor(base_regressor(**kwargs))
             mapie.fit(X_tr, y_tr)
-            preds_m, intervals_m = mapie.predict(X_ood, alpha=[0.05])
+            _, intervals_m = evaluate_mapie(
+                model=base_regressor(**kwargs),
+                X_tr=X_tr,
+                X_te=X_ood,
+                y_tr=y_tr,
+                y_te=y_ood,
+                uncertainty=0.05,
+            )
+            # Nasa
 
             # Statistics
             df = pd.DataFrame(
