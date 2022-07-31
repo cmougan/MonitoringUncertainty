@@ -47,7 +47,7 @@ from tabulate import tabulate
 
 ## Create variables
 ### Normal
-samples = 10_00
+samples = 10_000
 x1 = np.random.normal(1, 0.1, size=samples)
 x2 = np.random.normal(1, 0.1, size=samples)
 x3 = np.random.normal(1, 0.1, size=samples)
@@ -202,17 +202,24 @@ def monitoring_plot(
                 df = pd.DataFrame(standard_scaler.transform(df), columns=df.columns)
 
             # Convert to dic for plotting
+            df = df.rename(
+                columns={
+                    "uncertainty_m": "Mapie",
+                    "uncertainty_n": "Nasa",
+                    "uncertainty": "Doubt",
+                }
+            )
             for index, col in enumerate(df.columns):
                 values[col] = df[col]
 
             uncertainty_res.append(
-                mean_absolute_error(values["error"], values["uncertainty"])
+                mean_absolute_error(values["error"], values["Doubt"])
             )
             uncertainty_m_res.append(
-                mean_absolute_error(values["error"], values["uncertainty_m"])
+                mean_absolute_error(values["error"], values["Mapie"])
             )
             uncertainty_n_res.append(
-                mean_absolute_error(values["error"], values["uncertainty_n"])
+                mean_absolute_error(values["error"], values["Nasa"])
             )
             ks_res.append(mean_absolute_error(values["error"], values["ks"]))
             psi_res.append(mean_absolute_error(values["error"], values["PSI"]))
@@ -221,15 +228,14 @@ def monitoring_plot(
             )
 
             # Plotting
-
             for name, vals in values.items():
-                axs[idx].plot(vals, label=f"{name} values")
+                axs[idx].plot(vals, label=f"{name}")
 
         resultados = pd.DataFrame(
             {
-                "uncertainy": uncertainty_res,
-                "uncertainty_m": uncertainty_m_res,
-                "uncertainty_n": uncertainty_n_res,
+                "Doubt": uncertainty_res,
+                "Mapie": uncertainty_m_res,
+                "Nasa": uncertainty_n_res,
                 "ks": ks_res,
                 "psi": psi_res,
                 "target_shift": target_shift,
