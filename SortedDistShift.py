@@ -332,7 +332,6 @@ def monitoring_plot(
                 "target_shift": target_shift,
             }
         )
-        print("Data Synthetic")
         print(resultados.mean())
         resultados.loc["mean"] = resultados.mean()
 
