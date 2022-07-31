@@ -100,6 +100,7 @@ def monitoring_plot(
 
         uncertainty_res = []
         uncertainty_m_res = []
+        uncertainty_n_res = []
         ks_res = []
         psi_res = []
         target_shift = []
@@ -133,8 +134,6 @@ def monitoring_plot(
             )
 
             # Mapie
-            mapie = MapieRegressor(base_regressor(**kwargs))
-            mapie.fit(X_tr, y_tr)
             _, intervals_m = evaluate_mapie(
                 model=base_regressor(**kwargs),
                 X_tr=X_tr,
@@ -145,12 +144,21 @@ def monitoring_plot(
                 desaggregated=True,
             )
             # Nasa
-
+            _, intervals_n = evaluate_nasa(
+                model=base_regressor(**kwargs),
+                X_tr=X_tr,
+                X_te=X_ood,
+                y_tr=y_tr.target.values,
+                y_te=y_ood,
+                uncertainty=0.05,
+                desaggregated=True,
+            )
             # Statistics
             df = pd.DataFrame(
                 intervals[:, 1] - intervals[:, 0], columns=["uncertainty"]
             )
             df["uncertainty_m"] = intervals_m[:, 1] - intervals_m[:, 0]
+            df["uncertainty_n"] = intervals_n[:, 1] - intervals_n[:, 0]
             df["error"] = np.abs(preds - y_ood.values)
 
             ### KS Test
@@ -203,6 +211,9 @@ def monitoring_plot(
             uncertainty_m_res.append(
                 mean_absolute_error(values["error"], values["uncertainty_m"])
             )
+            uncertainty_n_res.append(
+                mean_absolute_error(values["error"], values["uncertainty_n"])
+            )
             ks_res.append(mean_absolute_error(values["error"], values["ks"]))
             psi_res.append(mean_absolute_error(values["error"], values["PSI"]))
             target_shift.append(
@@ -218,6 +229,7 @@ def monitoring_plot(
             {
                 "uncertainy": uncertainty_res,
                 "uncertainty_m": uncertainty_m_res,
+                "uncertainty_n": uncertainty_n_res,
                 "ks": ks_res,
                 "psi": psi_res,
                 "target_shift": target_shift,

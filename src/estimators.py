@@ -29,7 +29,7 @@ def evaluate_nasa(model, X_tr, X_te, y_tr, y_te, uncertainty=0.05, desaggregated
     for boot_idx in range(n_boots):
         train_idxs = rng.choice(range(n_train), size=n_train, replace=True)
         X_btr = X_tr.values[train_idxs, :]
-        y_btr = y_tr.values[train_idxs]
+        y_btr = y_tr[train_idxs]
 
         model.fit(X_btr, y_btr)
 
