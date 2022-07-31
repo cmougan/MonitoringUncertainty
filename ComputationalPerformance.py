@@ -36,13 +36,13 @@ scaler = StandardScaler()
 # Add Doubt datasets
 dataset_classes = [
     Airfoil,
-    # Concrete,
-    # FishToxicity,
-    # ForestFire,
-    # NewTaipeiHousing,
-    # PowerPlant,
-    # Protein,
-    # Servo,
+    Concrete,
+    FishToxicity,
+    ForestFire,
+    NewTaipeiHousing,
+    PowerPlant,
+    Protein,
+    Servo,
 ]
 
 for dataset_class in dataset_classes:
