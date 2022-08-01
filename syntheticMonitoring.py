@@ -259,6 +259,4 @@ def monitoring_plot(
 # %%
 a = monitoring_plot(df, Lasso, alpha=0.00001)
 
-# %%
-a
-# %%
+a.to_csv("experiments/results/monitoring_synthetic.csv")
