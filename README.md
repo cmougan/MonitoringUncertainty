@@ -43,3 +43,25 @@ The notebook for this experiment is xAIUncertainty.ipynb
 
 Monitoring `syntheticMonitoring.py`
 Explainable AI `syntheticxAI.py`
+
+```python
+from sklearn.linear_model import LinearRegression
+from doubt import Boot
+import numpy as np
+
+x1 = np.random.normal(1, 0.1, size=10000)
+x2 = np.random.normal(1, 0.1, size=10000)
+x3 = np.random.normal(1, 0.1, size=10000)
+X = np.array([x1, x2, x3]).T
+X_ood = np.array([x1 + 5, x2, x3]).T
+y = x1 ** 2 + x2 + np.random.normal(0, 0.01, 10000)
+clf = Boot(LinearRegression())
+clf = clf.fit(X, y)
+
+preds, intervals = clf.predict(X_ood, uncertainty=0.05)
+unc = intervals[:, 1] - intervals[:, 0]
+
+m = LinearRegression().fit(X_ood, unc)
+np.round(m.coef_, decimals=2)
+#[ 0.01,  0.  , -0.  ]
+```
