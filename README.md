@@ -1,5 +1,6 @@
 [![black](https://img.shields.io/badge/code%20style-black-000000.svg?style=plastic)](https://github.com/psf/black)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?color=g&style=plastic)](https://opensource.org/licenses/MIT)
+[![Conference](https://img.shields.io/badge/Conference-AAAI23-blue)](https://arxiv.org/abs/2201.11676)
 
 # Monitoring Model Deterioration with Explainable Uncertainty Estimation via Non-parametric Bootstrap
 ## Abstract
