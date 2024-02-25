@@ -54,8 +54,7 @@ import matplotlib.pyplot as plt
 from mapie.regression import MapieRegressor
 from skshift import ExplanationShiftDetector
 
-plt.style.use("seaborn-whitegrid")
-
+#plt.style.use("seaborn-whitegrid")
 
 import warnings
 from collections import defaultdict
@@ -79,12 +78,12 @@ from xgboost import XGBRegressor
 dataset_classes = [
     Airfoil,
     Concrete,
-    ForestFire,
-    Parkinsons,
-    PowerPlant,
-    Protein,
-    BikeSharingHourly,
-    FishToxicity,
+    # ForestFire,
+    # Parkinsons,
+    # PowerPlant,
+    # Protein,
+    # BikeSharingHourly,
+    # FishToxicity,
 ]
 for dataset in dataset_classes:
     print(dataset.__name__, dataset().shape)
@@ -360,7 +359,7 @@ def monitoring_plot(
             }
         )
         print(resultados.mean())
-        resultados.loc["mean"] = resultados.mean()
+        # resultados.loc["mean"] = resultados.mean()
 
         if plot:
             fig.legend()
@@ -370,8 +369,11 @@ def monitoring_plot(
 
 # %%
 print("Linear Regression")
+c = pd.DataFrame()
 for dataset in dataset_classes:
-    monitoring_plot(dataset, LinearRegression)
+    c = c.append(monitoring_plot(dataset, LinearRegression))
+# save as csv
+c.to_csv("experiments/linear_regression.csv")
 # %%
 print("Poisson Regressor")
 for dataset in dataset_classes:
