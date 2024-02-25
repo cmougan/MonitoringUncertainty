@@ -73,7 +73,6 @@ from tqdm.notebook import tqdm
 
 from xgboost import XGBRegressor
 
-
 # %%
 dataset_classes = [
     Airfoil,
@@ -113,9 +112,6 @@ for dataset in dataset_classes:
     download_datasets(dataset)
     print(dataset.__name__, dataset().shape)
 # %%
-
-
-# %%
 def initialise_plot(num_rows: int, num_cols: int, base_regressor: type, dataset):
     fig, axs = plt.subplots(
         num_rows,
@@ -136,8 +132,6 @@ def initialise_plot(num_rows: int, num_cols: int, base_regressor: type, dataset)
 
 
 # %%
-
-
 def kol_smi(x):
     return ks_2samp(x, BASE_COMP).statistic
 
