@@ -86,6 +86,12 @@ dataset_classes = [
     # FishToxicity,
 ]
 def download_datasets(ds):
+    # Check if its already downloaded
+    try:
+        pd.read_csv(f"data/{ds.__name__}.csv")
+        return
+    except:
+        pass
     X, _, y, _ = ds().split(test_size=0.001, random_seed=4242)
     X = pd.DataFrame(X, columns=["Var %d" % (i + 1) for i in range(X.shape[1])])
     X["target"] = y
@@ -386,7 +392,7 @@ def monitoring_plot(
 print("Linear Regression")
 c = pd.DataFrame()
 for dataset in dataset_classes:
-    c = c.append(monitoring_plot(dataset, LinearRegression))
+    c = pd.concat([c, monitoring_plot(dataset, LinearRegression)], ignore_index=True)
 # save as csv
 c.to_csv("experiments/linear_regression.csv")
 # %%
