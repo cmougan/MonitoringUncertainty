@@ -3,13 +3,18 @@ import pdb
 
 # Import candidate models
 from doubt import Boot
-from sklearn.linear_model import LinearRegression, PoissonRegressor, GammaRegressor
+from sklearn.linear_model import (
+    LinearRegression,
+    PoissonRegressor,
+    GammaRegressor,
+    LogisticRegression,
+)
 from sklearn.ensemble import RandomForestRegressor
 
 from sklearn.neural_network import MLPRegressor
 from sklearn.preprocessing import StandardScaler
 from sklearn.tree import DecisionTreeRegressor
-from sklearn.metrics import mean_absolute_error
+from sklearn.metrics import mean_absolute_error, roc_auc_score
 
 # Import datasets
 from src.estimators import evaluate_nasa, evaluate_doubt, evaluate_mapie
@@ -47,6 +52,7 @@ from tqdm.auto import tqdm
 from scipy.stats import ks_2samp
 import matplotlib.pyplot as plt
 from mapie.regression import MapieRegressor
+from skshift import ExplanationShiftDetector
 
 plt.style.use("seaborn-whitegrid")
 
@@ -83,9 +89,7 @@ dataset_classes = [
 for dataset in dataset_classes:
     print(dataset.__name__, dataset().shape)
 
-    # %%
-
-
+# %%
 def initialise_plot(num_rows: int, num_cols: int, base_regressor: type, dataset):
     fig, axs = plt.subplots(
         num_rows,
@@ -173,6 +177,7 @@ def monitoring_plot(
         uncertainty_res = []
         uncertainty_m_res = []
         uncertainty_n_res = []
+        esd_res = []
         ks_res = []
         psi_res = []
         target_shift = []
@@ -240,12 +245,28 @@ def monitoring_plot(
                 uncertainty=0.05,
                 desaggregated=True,
             )
+            # Explanaition Shift
+            esd_model = base_regressor(**kwargs)
+            esd_model.fit(X_tr, y_tr)
+            esd = ExplanationShiftDetector(
+                model=esd_model,
+                gmodel=LogisticRegression(),
+                masker=True,
+                data_masker=X_tr,
+            )
+            esd.fit_detector(X_tr, X_up)
+            preds_tot_esd = esd.predict_proba(X_tot)[:, 1]
+            y_true_esd = np.concatenate(
+                [np.ones(len(y_sub)), np.zeros(len(y_tr)), np.ones(len(y_up))]
+            )
+
             # Statistics
             df = pd.DataFrame(
                 intervals[:, 1] - intervals[:, 0], columns=["uncertainty"]
             )
             df["uncertainty_m"] = intervals_m[:, 1] - intervals_m[:, 0]
             df["uncertainty_n"] = intervals_n[:, 1] - intervals_n[:, 0]
+            df["esd"] = np.abs(preds_tot_esd - y_true_esd)
             df["error"] = np.abs(preds - y_tot)
 
             ### KS Test
@@ -294,6 +315,7 @@ def monitoring_plot(
                     "uncertainty_m": "Mapie",
                     "uncertainty_n": "Nasa",
                     "uncertainty": "Doubt",
+                    "esd": "Explanation Shift",
                 }
             )
             for index, col in enumerate(df.columns):
@@ -308,6 +330,10 @@ def monitoring_plot(
             uncertainty_n_res.append(
                 mean_absolute_error(values["error"], values["Nasa"])
             )
+            esd_res.append(
+                mean_absolute_error(values["error"], values["Explanation Shift"])
+            )
+
             ks_res.append(mean_absolute_error(values["error"], values["ks"]))
             psi_res.append(mean_absolute_error(values["error"], values["PSI"]))
             target_shift.append(
@@ -327,6 +353,7 @@ def monitoring_plot(
                 "Doubt": uncertainty_res,
                 "Mapie": uncertainty_m_res,
                 "Nasa": uncertainty_n_res,
+                "Explanation Shift": esd_res,
                 "ks": ks_res,
                 "psi": psi_res,
                 "target_shift": target_shift,
@@ -408,3 +435,12 @@ for idx, key in enumerate(dfs.keys()):
 
 plt.show()
 """
+# %%
+esd_model = LinearRegression()
+esd_model.fit(X, y)
+esd = ExplanationShiftDetector(
+    model=esd_model, gmodel=LogisticRegression(), masker=True, data_masker=X
+)
+esd.fit_detector(X, X)
+
+# %%
