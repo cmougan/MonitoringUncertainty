@@ -85,8 +85,23 @@ dataset_classes = [
     # BikeSharingHourly,
     # FishToxicity,
 ]
+def download_datasets(ds):
+    X, _, y, _ = ds().split(test_size=0.001, random_seed=4242)
+    X = pd.DataFrame(X, columns=["Var %d" % (i + 1) for i in range(X.shape[1])])
+    X["target"] = y
+    X.to_csv(f"data/{ds.__name__}.csv", index=False)
+
+def read_datasets(ds):
+    df = pd.read_csv(f"data/{ds.__name__}.csv")
+    X = df.drop(columns="target")
+    y = df["target"]
+    return X, y
+
 for dataset in dataset_classes:
+    download_datasets(dataset)
     print(dataset.__name__, dataset().shape)
+# %%
+
 
 # %%
 def initialise_plot(num_rows: int, num_cols: int, base_regressor: type, dataset):
@@ -142,7 +157,7 @@ def monitoring_plot(
         standard_scaler = StandardScaler()
 
         # Load the dataset and split it
-        X, _, y, _ = dataset().split(test_size=0.001, random_seed=4242)
+        X, y, = read_datasets(dataset)
 
         # Scale the dataset
         X = standard_scaler.fit_transform(X)
