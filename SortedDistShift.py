@@ -82,7 +82,6 @@ dataset_classes = [
     Parkinsons,
     PowerPlant,
     Protein,
-    BikeSharingHourly,
     FishToxicity,
 ]
 
