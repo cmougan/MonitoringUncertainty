@@ -38,3 +38,10 @@ test:
 computationalPerformance:
 	python ComputationalPerformance.py
 	python experiments/analyzeComputationalPerformance.py
+
+q:
+	squeue -u $(USER)
+
+
+clean:
+	rm logs/*
