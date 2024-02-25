@@ -144,3 +144,4 @@ catboost_info
 *.eps
 .vscode
 *.png
+logs*
