@@ -94,7 +94,10 @@ def download_datasets(ds):
         pass
     X, _, y, _ = ds().split(test_size=0.001, random_seed=4242)
     X = pd.DataFrame(X, columns=["Var %d" % (i + 1) for i in range(X.shape[1])])
-    X["target"] = y
+    try:
+        X["target"] = y
+    except:
+        X["target"] = y[:, 0]
     X.to_csv(f"data/{ds.__name__}.csv", index=False)
 
 def read_datasets(ds):
