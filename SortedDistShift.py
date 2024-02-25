@@ -79,8 +79,6 @@ dataset_classes = [
     Concrete,
     ForestFire,
     Parkinsons,
-    PowerPlant,
-    Protein,
     FishToxicity,
 ]
 
