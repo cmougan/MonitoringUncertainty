@@ -78,12 +78,12 @@ from xgboost import XGBRegressor
 dataset_classes = [
     Airfoil,
     Concrete,
-    # ForestFire,
-    # Parkinsons,
-    # PowerPlant,
-    # Protein,
-    # BikeSharingHourly,
-    # FishToxicity,
+    ForestFire,
+    Parkinsons,
+    PowerPlant,
+    Protein,
+    BikeSharingHourly,
+    FishToxicity,
 ]
 def download_datasets(ds):
     # Check if its already downloaded
