@@ -54,7 +54,7 @@ import matplotlib.pyplot as plt
 from mapie.regression import MapieRegressor
 from skshift import ExplanationShiftDetector
 
-#plt.style.use("seaborn-whitegrid")
+# plt.style.use("seaborn-whitegrid")
 
 import warnings
 from collections import defaultdict
@@ -85,6 +85,8 @@ dataset_classes = [
     BikeSharingHourly,
     FishToxicity,
 ]
+
+
 def download_datasets(ds):
     # Check if its already downloaded
     try:
@@ -100,16 +102,18 @@ def download_datasets(ds):
         X["target"] = y[:, 0]
     X.to_csv(f"data/{ds.__name__}.csv", index=False)
 
+
 def read_datasets(ds):
     df = pd.read_csv(f"data/{ds.__name__}.csv")
     X = df.drop(columns="target")
     y = df["target"]
     return X, y
 
+
 for dataset in dataset_classes:
     download_datasets(dataset)
     print(dataset.__name__, dataset().shape)
-# %%
+# %%
 
 
 # %%
@@ -166,7 +170,10 @@ def monitoring_plot(
         standard_scaler = StandardScaler()
 
         # Load the dataset and split it
-        X, y, = read_datasets(dataset)
+        (
+            X,
+            y,
+        ) = read_datasets(dataset)
 
         # Scale the dataset
         X = standard_scaler.fit_transform(X)
@@ -204,9 +211,7 @@ def monitoring_plot(
         ks_res = []
         psi_res = []
         target_shift = []
-        for idx, col in tqdm(
-            enumerate(X.columns), total=len(X.columns), desc="Columns"
-        ):
+        for idx, col in enumerate(X.columns):
             if idx > 9:  # Limit in columns
                 continue
             values = defaultdict(list)
