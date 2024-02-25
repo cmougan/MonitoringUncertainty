@@ -399,6 +399,7 @@ def monitoring_plot(
 print("Linear Regression")
 c = pd.DataFrame()
 for dataset in dataset_classes:
+    print(dataset.__name__)
     c = pd.concat([c, monitoring_plot(dataset, LinearRegression)], ignore_index=True)
 # save as csv
 c.to_csv("experiments/linear_regression.csv")
