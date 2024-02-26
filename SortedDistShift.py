@@ -81,6 +81,8 @@ dataset_classes = [
     Parkinsons,
     FishToxicity,
 ]
+
+
 def download_datasets(ds):
     # Check if its already downloaded
     try:

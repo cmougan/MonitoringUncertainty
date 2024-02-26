@@ -145,3 +145,4 @@ catboost_info
 .vscode
 *.png
 logs*
+*.csv

@@ -2,9 +2,7 @@
 # Import candidate models
 from sklearn.utils.validation import check_is_fitted
 from doubt import Boot
-from sklearn.linear_model import (
-    Lasso,LogisticRegression
-)
+from sklearn.linear_model import Lasso, LogisticRegression
 from skshift import ExplanationShiftDetector
 from mapie.regression import MapieRegressor
 from sklearn.preprocessing import StandardScaler
@@ -117,16 +115,11 @@ def monitoring_plot(
                 + np.random.normal(0, 0.01, X_ood.shape[0])
             )
 
-            X_tot = pd.concat([ X_te, X_ood])
+            X_tot = pd.concat([X_te, X_ood])
             y_tot = pd.concat([y_te, pd.Series(y_ood)]).reset_index(drop=True)
             a1 = np.zeros(len(y_te))
             a2 = np.ones(len(y_ood))
             y_tot_esd = np.concatenate([a1, a2])
-
-            print('X_tot',X_tot.shape)
-            print('y_tot',len(y_tot),type(y_tot))
-            print('y_tot_esd',len(y_tot_esd),type(y_tot_esd))
-
 
             # Predictions
             base_model = base_regressor(**kwargs)
@@ -174,9 +167,7 @@ def monitoring_plot(
                 data_masker=X_tr,
             )
             esd.fit_detector(X_tr, X_ood)
-            preds_tot_esd = esd.predict_proba(X_tot)[:, 1]
-            print(len(preds_tot_esd))
-            print(X_tot.shape)
+            preds_ood_esd = esd.predict_proba(X_ood)[:, 1]
 
             # Statistics
             df = pd.DataFrame(
@@ -185,11 +176,8 @@ def monitoring_plot(
             df["uncertainty_m"] = intervals_m[:, 1] - intervals_m[:, 0]
             df["uncertainty_n"] = intervals_n[:, 1] - intervals_n[:, 0]
             df["error"] = np.abs(preds - y_ood.values)
-            print('before')
-            print('preds_tot_esd',preds_tot_esd)
-            print('y_tot_esd',y_tot_esd)
 
-            df["esd"] = np.abs(preds_tot_esd - y_tot_esd)
+            df["esd"] = np.abs(preds_ood_esd - np.ones(len(preds_ood_esd)))
 
             ### KS Test
             df["ks"] = X_ood[col].values
@@ -261,7 +249,6 @@ def monitoring_plot(
                 mean_absolute_error(values["error"], values["Explanation Shift"])
             )
 
-
         resultados = pd.DataFrame(
             {
                 "Doubt": uncertainty_res,
@@ -276,7 +263,7 @@ def monitoring_plot(
         print("Data Synthetic")
         print(resultados.mean())
         resultados.loc["mean"] = resultados.mean()
-        plot=False
+        plot = False
         if plot:
             plt.legend(loc=2, prop={"size": 6})
             axs[0].set_title("Quadratic feature")
@@ -292,3 +279,5 @@ def monitoring_plot(
 a = monitoring_plot(df, Lasso, alpha=0.00001)
 
 a.to_csv("experiments/results/monitoring_synthetic.csv")
+
+# %%
