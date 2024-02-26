@@ -44,7 +44,7 @@ from tabulate import tabulate
 
 ## Create variables
 ### Normal
-samples = 10_0
+samples = 10_000
 x1 = np.random.normal(1, 0.1, size=samples)
 x2 = np.random.normal(1, 0.1, size=samples)
 x3 = np.random.normal(1, 0.1, size=samples)
