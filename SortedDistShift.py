@@ -140,9 +140,6 @@ def psi_stat(x):
     return psi(x, BASE_COMP)
 
 
-# In[18]:
-
-
 def monitoring_plot(
     dataset,
     base_regressor: type,
@@ -386,6 +383,7 @@ def monitoring_plot(
 
 
 # %%
+"""
 print("Linear Regression")
 c = pd.DataFrame()
 for dataset in dataset_classes:
@@ -401,6 +399,7 @@ for dataset in dataset_classes:
 print("Decision Tree Regressor Depth 10")
 for dataset in dataset_classes:
     monitoring_plot(dataset, DecisionTreeRegressor, max_depth=10)
+"""
 # %%
 print("Random Forest Regressor")
 for dataset in dataset_classes:

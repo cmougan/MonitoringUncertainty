@@ -1,11 +1,11 @@
 # %%
 # Import candidate models
-
 from sklearn.utils.validation import check_is_fitted
 from doubt import Boot
 from sklearn.linear_model import (
-    Lasso,
+    Lasso,LogisticRegression
 )
+from skshift import ExplanationShiftDetector
 from mapie.regression import MapieRegressor
 from sklearn.preprocessing import StandardScaler
 from src.estimators import evaluate_nasa, evaluate_doubt, evaluate_mapie
@@ -30,7 +30,6 @@ from collections import defaultdict
 
 from matplotlib import rcParams
 
-plt.style.use("seaborn-whitegrid")
 rcParams["axes.labelsize"] = 14
 rcParams["xtick.labelsize"] = 12
 rcParams["ytick.labelsize"] = 12
@@ -47,7 +46,7 @@ from tabulate import tabulate
 
 ## Create variables
 ### Normal
-samples = 10_000
+samples = 10_0
 x1 = np.random.normal(1, 0.1, size=samples)
 x2 = np.random.normal(1, 0.1, size=samples)
 x3 = np.random.normal(1, 0.1, size=samples)
@@ -103,8 +102,9 @@ def monitoring_plot(
         uncertainty_n_res = []
         ks_res = []
         psi_res = []
+        esd_res = []
         target_shift = []
-        for idx, col in tqdm(enumerate(X.columns), total=len(X.columns)):
+        for idx, col in enumerate(X.columns):
             values = defaultdict(list)
 
             # OOD
@@ -116,6 +116,17 @@ def monitoring_plot(
                 + X_ood["Var2"]
                 + np.random.normal(0, 0.01, X_ood.shape[0])
             )
+
+            X_tot = pd.concat([ X_te, X_ood])
+            y_tot = pd.concat([y_te, pd.Series(y_ood)]).reset_index(drop=True)
+            a1 = np.zeros(len(y_te))
+            a2 = np.ones(len(y_ood))
+            y_tot_esd = np.concatenate([a1, a2])
+
+            print('X_tot',X_tot.shape)
+            print('y_tot',len(y_tot),type(y_tot))
+            print('y_tot_esd',len(y_tot_esd),type(y_tot_esd))
+
 
             # Predictions
             base_model = base_regressor(**kwargs)
@@ -153,6 +164,20 @@ def monitoring_plot(
                 uncertainty=0.05,
                 desaggregated=True,
             )
+            # Explanaition Shift
+            esd_model = base_regressor(**kwargs)
+            esd_model.fit(X_tr, y_tr)
+            esd = ExplanationShiftDetector(
+                model=esd_model,
+                gmodel=LogisticRegression(),
+                masker=True,
+                data_masker=X_tr,
+            )
+            esd.fit_detector(X_tr, X_ood)
+            preds_tot_esd = esd.predict_proba(X_tot)[:, 1]
+            print(len(preds_tot_esd))
+            print(X_tot.shape)
+
             # Statistics
             df = pd.DataFrame(
                 intervals[:, 1] - intervals[:, 0], columns=["uncertainty"]
@@ -160,6 +185,11 @@ def monitoring_plot(
             df["uncertainty_m"] = intervals_m[:, 1] - intervals_m[:, 0]
             df["uncertainty_n"] = intervals_n[:, 1] - intervals_n[:, 0]
             df["error"] = np.abs(preds - y_ood.values)
+            print('before')
+            print('preds_tot_esd',preds_tot_esd)
+            print('y_tot_esd',y_tot_esd)
+
+            df["esd"] = np.abs(preds_tot_esd - y_tot_esd)
 
             ### KS Test
             df["ks"] = X_ood[col].values
@@ -207,6 +237,7 @@ def monitoring_plot(
                     "uncertainty_m": "Mapie",
                     "uncertainty_n": "Nasa",
                     "uncertainty": "Doubt",
+                    "esd": "Explanation Shift",
                 }
             )
             for index, col in enumerate(df.columns):
@@ -226,16 +257,17 @@ def monitoring_plot(
             target_shift.append(
                 mean_absolute_error(values["error"], values["target_shift"])
             )
+            esd_res.append(
+                mean_absolute_error(values["error"], values["Explanation Shift"])
+            )
 
-            # Plotting
-            for name, vals in values.items():
-                axs[idx].plot(vals, label=f"{name}")
 
         resultados = pd.DataFrame(
             {
                 "Doubt": uncertainty_res,
                 "Mapie": uncertainty_m_res,
                 "Nasa": uncertainty_n_res,
+                "Explanation Shift": esd_res,
                 "ks": ks_res,
                 "psi": psi_res,
                 "target_shift": target_shift,
@@ -244,7 +276,7 @@ def monitoring_plot(
         print("Data Synthetic")
         print(resultados.mean())
         resultados.loc["mean"] = resultados.mean()
-
+        plot=False
         if plot:
             plt.legend(loc=2, prop={"size": 6})
             axs[0].set_title("Quadratic feature")
